@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nómada · Viaja más por menos</title>
+<meta name="description" content="Planifica tu viaje con IA y descubre cuánto cuesta de verdad. La comunidad donde la gente comparte itinerarios reales con sus precios.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#F4F6FA; --card:#FFFFFF; --ink:#0F1523; --ink-soft:#525C74;
+    --line:#E2E7F0; --muted:#8B94A8; --accent:#3457FF; --accent-soft:#E6EAFF;
+    --ok:#1FA97E; --shadow:0 1px 2px rgba(15,21,35,.05),0 12px 34px rgba(15,21,35,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B0E16; --card:#141926; --ink:#ECEFF6; --ink-soft:#A3ACC2;
+      --line:#232B3D; --muted:#6C768F; --accent:#6E86FF; --accent-soft:#1A2340;
+      --ok:#3FBF97; --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 40px rgba(0,0,0,.45);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+  h1,h2,h3{font-family:"Bricolage Grotesque",Georgia,serif;font-weight:600;
+    margin:0;letter-spacing:-.02em;text-wrap:balance}
+  .wrap{max-width:960px;margin:0 auto;padding-inline:20px}
+  a{color:inherit}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding-block:20px}
+  .logo{font-family:"Bricolage Grotesque",serif;font-weight:700;font-size:22px}
+  .logo b{color:var(--accent)}
+  .nav a.small{font-size:14px;color:var(--ink-soft);text-decoration:none}
+
+  .hero{padding-block:46px 30px;text-align:center}
+  .badge{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:6px 14px;margin-bottom:20px}
+  .hero h1{font-size:clamp(34px,6vw,56px);line-height:1.05}
+  .hero h1 .hl{color:var(--accent)}
+  .hero p{font-size:clamp(16px,2.4vw,20px);color:var(--ink-soft);max-width:56ch;margin:18px auto 0}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+  .btn{font:inherit;font-weight:700;font-size:16px;border:none;border-radius:12px;padding:14px 22px;
+    cursor:pointer;text-decoration:none;display:inline-block}
+  .btn.primary{background:var(--accent);color:#fff;box-shadow:var(--shadow)}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--accent)}
+  .note{font-size:12.5px;color:var(--muted);margin-top:14px}
+
+  section{padding-block:34px}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);text-align:center}
+  h2.title{font-size:clamp(24px,4vw,34px);text-align:center;margin-top:8px}
+  .sub{color:var(--ink-soft);text-align:center;max-width:54ch;margin:10px auto 0;font-size:15.5px}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px}
+  .step .n{font-family:"Bricolage Grotesque",serif;font-size:14px;color:var(--accent);font-weight:700}
+  .step h3{font-size:18px;margin:8px 0 6px}
+  .step p{font-size:14px;color:var(--ink-soft);margin:0}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px}
+  .box h3{font-size:17px;margin-bottom:12px}
+  .box.bad h3{color:var(--muted)}
+  .box.good h3{color:var(--ok)}
+  .box ul{margin:0;padding-left:18px}
+  .box li{font-size:14px;margin:7px 0;color:var(--ink-soft)}
+  .box.good li{color:var(--ink)}
+
+  .price-demo{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);
+    padding:20px;max-width:520px;margin:26px auto 0}
+  .price-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+  .price-row:first-child{border-top:none}
+  .price-row .p{font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums}
+  .price-total{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;
+    border-top:2px solid var(--ink);font-weight:700}
+  .price-total .p{color:var(--ok)}
+
+  .waitlist{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
+    padding:34px;text-align:center;margin-top:10px}
+  .waitlist h2{font-size:28px}
+  .waitlist p{color:var(--ink-soft);max-width:48ch;margin:10px auto 0}
+  form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+  input[type=email]{font:inherit;font-size:16px;padding:14px 16px;border:1px solid var(--line);
+    border-radius:12px;background:var(--bg);color:var(--ink);min-width:260px}
+  input[type=email]:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .formmsg{margin-top:12px;font-size:14px;font-weight:600;color:var(--ok);min-height:20px}
+  .feedback-link{display:inline-block;margin-top:16px;font-size:14px;font-weight:600;color:var(--accent);text-decoration:none}
+  .feedback-link:hover{text-decoration:underline}
+
+  .faq{max-width:680px;margin:26px auto 0}
+  details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-top:10px}
+  details summary{font-weight:600;cursor:pointer;font-size:15px}
+  details p{color:var(--ink-soft);font-size:14px;margin:10px 0 0}
+
+  footer{border-top:1px solid var(--line);margin-top:20px;padding-block:26px;text-align:center;
+    color:var(--muted);font-size:12.5px}
+  @media(max-width:640px){.steps{grid-template-columns:1fr}.cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<script>
+  /* Para capturar emails de verdad: crea un form gratis en https://formspree.io
+     y pega aquí tu endpoint (algo como "https://formspree.io/f/xxxxxx").
+     Si lo dejas vacío, el botón abre el correo con el email escrito (fallback). */
+  const FORM_ENDPOINT="";
+  const CONTACT_EMAIL="marcbm2005@gmail.com";
+  /* Para recoger opiniones: crea un Google Form y pega su enlace aquí. */
+  const FEEDBACK_FORM_URL="";
+</script>
+
+<div class="wrap">
+  <nav class="nav">
+    <span class="logo">Nómada<b>.</b></span>
+    <a class="small" href="#lista">Apúntate</a>
+  </nav>
+
+  <header class="hero">
+    <span class="badge">Viajes con presupuesto real</span>
+    <h1>Viaja más, <span class="hl">gastando menos</span>.</h1>
+    <p>Planifica tu viaje con IA y descubre <b>cuánto cuesta de verdad</b>. Y sobre todo:
+       copia itinerarios reales que otros viajeros ya han hecho, con sus precios, y adáptalos a tu bolsillo.</p>
+    <div class="cta">
+      <a class="btn primary" href="#lista">Quiero probarlo</a>
+      <a class="btn ghost" href="#como">Ver cómo funciona</a>
+    </div>
+    <p class="note">En construcción · sé de los primeros en probarlo</p>
+  </header>
+
+  <section id="como">
+    <div class="kicker">Cómo funciona</div>
+    <h2 class="title">De una idea a un plan con precio en segundos</h2>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><h3>Dinos tu viaje</h3>
+        <p>Destino, fechas, con quién vas y qué te apetece. Sin registros ni descargas.</p></div>
+      <div class="step"><div class="n">02</div><h3>Recibe tu plan</h3>
+        <p>Un itinerario día a día con qué ver, dónde comer y el precio estimado de cada cosa.</p></div>
+      <div class="step"><div class="n">03</div><h3>Compara y ahorra</h3>
+        <p>Explora viajes de la comunidad, filtra por presupuesto y copia el que encaje contigo.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Lo que nos diferencia</div>
+    <h2 class="title">El precio, en el centro</h2>
+    <p class="sub">Las apps de viajes te inspiran, pero casi ninguna te dice lo que vas a gastar. Nómada sí.</p>
+    <div class="price-demo" aria-hidden="true">
+      <div class="price-row"><span>Free tour por el casco antiguo</span><span class="p">Gratis</span></div>
+      <div class="price-row"><span>Comida en mercado local</span><span class="p">~12 €</span></div>
+      <div class="price-row"><span>Entrada al museo</span><span class="p">~9 €</span></div>
+      <div class="price-row"><span>Cena con vistas</span><span class="p">~22 €</span></div>
+      <div class="price-total"><span>Total del día</span><span class="p">≈ 43 € por persona</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Por qué Nómada</div>
+    <h2 class="title">La forma antigua vs. la forma Nómada</h2>
+    <div class="cols">
+      <div class="box bad"><h3>La forma antigua</h3>
+        <ul>
+          <li>Mil pestañas y blogs para armar un plan</li>
+          <li>Ni idea de cuánto va a costar hasta que ya estás gastando</li>
+          <li>Consejos genéricos que no se adaptan a tu bolsillo</li>
+          <li>Apps que te obligan a descargar y registrarte</li>
+        </ul></div>
+      <div class="box good"><h3>La forma Nómada</h3>
+        <ul>
+          <li>Itinerario completo en segundos, en el navegador</li>
+          <li>Precio estimado de cada actividad y del viaje entero</li>
+          <li>Comunidad que comparte viajes reales con sus precios</li>
+          <li>Filtra por presupuesto y copia el plan que te encaje</li>
+        </ul></div>
+    </div>
+  </section>
+
+  <section id="lista">
+    <div class="waitlist">
+      <h2>Sé de los primeros en viajar con Nómada</h2>
+      <p>Estamos construyéndolo. Déjanos tu correo y te avisamos cuando puedas usarlo — y ayúdanos a decidir qué construir.</p>
+      <form id="wl">
+        <input type="email" id="email" placeholder="tu@correo.com" required>
+        <button class="btn primary" type="submit">Apúntame</button>
+      </form>
+      <div class="formmsg" id="formmsg"></div>
+      <a class="feedback-link" id="fb" href="#" style="display:none">¿Nos das tu opinión? (2 minutos) →</a>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Dudas</div>
+    <h2 class="title">Preguntas rápidas</h2>
+    <div class="faq">
+      <details><summary>¿Es gratis?</summary><p>Sí, planificar y explorar la comunidad será gratis. Habrá extras opcionales de pago más adelante.</p></details>
+      <details><summary>¿Los precios son reales?</summary><p>Se estiman con IA y, sobre todo, los aporta la comunidad: gente que ya hizo el viaje y comparte lo que gastó.</p></details>
+      <details><summary>¿Tengo que descargar una app?</summary><p>No. Nómada funciona en el navegador, sin instalar nada.</p></details>
+      <details><summary>¿Puedo editar el plan?</summary><p>Sí. Ajustas actividades, precios y días a mano, y lo compartes o publicas en la comunidad.</p></details>
+    </div>
+  </section>
+
+  <footer>
+    Nómada · prototipo en validación · viajar bien sabiendo lo que cuesta.
+  </footer>
+</div>
+
+<script>
+  const form=document.getElementById("wl");
+  const msg=document.getElementById("formmsg");
+  const fb=document.getElementById("fb");
+  if(FEEDBACK_FORM_URL){fb.href=FEEDBACK_FORM_URL;fb.style.display="inline-block";fb.target="_blank";fb.rel="noopener";}
+  form.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const email=document.getElementById("email").value.trim();
+    if(!email)return;
+    if(FORM_ENDPOINT){
+      try{
+        const r=await fetch(FORM_ENDPOINT,{method:"POST",headers:{"Accept":"application/json"},
+          body:new FormData(form)});
+        msg.textContent=r.ok?"¡Gracias! Te avisaremos pronto.":"No se pudo enviar, prueba de nuevo.";
+        if(r.ok)form.reset();
+      }catch(err){msg.textContent="No se pudo enviar, prueba de nuevo.";}
+    }else{
+      // Fallback sin backend: abre el correo con el email escrito
+      const subject=encodeURIComponent("Lista de espera Nómada");
+      const body=encodeURIComponent("Quiero probar Nómada. Mi correo: "+email);
+      window.location.href=`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+      msg.textContent="Se abrirá tu correo para confirmar tu interés.";
+    }
+  });
+</script>
+</body>
+</html>

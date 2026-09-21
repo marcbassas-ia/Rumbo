@@ -2,8 +2,33 @@
 
 Prototipo de una web que genera itinerarios de viaje día a día con IA.
 El usuario indica destino, fechas, personas, con quién viaja, intereses,
-imprescindibles y (opcional) horas de llegada/salida y alojamiento; Claude
+imprescindibles y (opcional) horas de llegada/salida y alojamiento; la IA
 devuelve un plan con qué ver, dónde comer y cómo organizar los días.
+
+## Posicionamiento de marca
+
+**Nómada es el planificador de viajes con precios reales y una comunidad que
+comparte cuánto cuesta cada viaje.** El dinero es el centro de la marca: no solo
+"a dónde ir", sino "por cuánto".
+
+- **Foco en viajar económico.** La sociedad de hoy, y sobre todo los jóvenes,
+  quiere viajar lo más barato posible. Nómada nace para eso: itinerarios con
+  precio estimado por actividad, coste total del viaje y una comunidad donde
+  filtras por presupuesto y encuentras viajes baratos ya probados por otros.
+- **Pero para todos los presupuestos.** No es solo "low cost": el filtro de
+  precio sirve tanto para el que busca gastar mínimo como para el que quiere
+  darse un capricho. Cada uno viaja a su nivel; Nómada lo hace transparente.
+- **Comunidad accionable (no solo inspiración).** Estilo Wikiloc/Strava: la
+  gente publica su viaje con precios reales, y cualquiera lo copia, lo edita y
+  lo adapta. El valor no es mirar viajes bonitos, es reutilizar planes reales
+  con su coste.
+- **Web-first, sin descargar nada.** Frente a las apps que obligan a instalar,
+  Nómada se prueba en el navegador en segundos. Menos fricción para empezar.
+- **El hueco del mercado.** Referentes como Polarsteps clavan la inspiración y
+  el seguimiento del viaje, pero **ignoran por completo el presupuesto**. Ese
+  es el ángulo propio de Nómada: viajar bien sabiendo lo que cuesta.
+
+Identidad propia, sin copiar a nadie: web, presupuesto y comunidad de precios.
 
 ## Funciones actuales
 - Generación del itinerario con IA (capacidad `sample` de Claude Artifacts).

@@ -44,6 +44,12 @@ Botón "✏️ Editar a mano": editar nombre/momento/tipo/detalle/precio de cada
 reordenar con ▲▼ (incluso mover paradas entre días), marcar imprescindibles con ★,
 añadir/borrar actividades y días. Los cambios se reflejan al descargar, compartir y publicar.
 
-### Otros
+### Mejoras para producción (requieren backend propio)
+- **Valoraciones reales dentro de la app** (Google Places / TripAdvisor API): mostrar la nota
+  (ej. ⭐4,6), fotos y horarios en la propia tarjeta, ordenar restaurantes por valoración, y
+  filtrar la comunidad por "solo sitios de +4 estrellas". Hoy solo se enlaza a Maps/TripAdvisor
+  (clic) porque un Artifact tiene bloqueadas las llamadas a APIs externas y esas APIs son de pago.
 - Comunidad pública real (backend propio, hoy es interna de la organización).
+
+### Otros
 - Alta en programas de afiliados y pegar los IDs en la config `AFF`.

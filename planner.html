@@ -108,6 +108,11 @@
     letter-spacing:.06em;color:var(--muted);font-weight:500}
   .act .c h4 .star{color:var(--warm);font-size:11px;font-weight:700}
   .act .c p{margin:2px 0 0;font-size:13.5px;color:var(--ink-soft)}
+  .act .c .links{display:flex;gap:8px;margin-top:5px;flex-wrap:wrap}
+  .act .c .links a{font-family:"DM Mono",monospace;font-size:10.5px;font-weight:500;
+    color:var(--accent);text-decoration:none;border:1px solid var(--line);
+    border-radius:7px;padding:2px 8px;background:var(--bg)}
+  .act .c .links a:hover{border-color:var(--accent)}
 
   .tips{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
     box-shadow:var(--shadow);padding:16px 18px;margin-top:8px}
@@ -367,6 +372,7 @@ const T={
    ed_addact:"➕ Actividad", ed_addday:"➕ Añadir día",
    ph_daytitle:"Título del día", ph_name:"Nombre del sitio o restaurante", ph_det:"Detalle (1 frase)", ph_moment:"Momento",
    ty_ver:"Ver", ty_comer:"Comer", ty_mover:"Transporte",
+   map_link:"🗺 Ver en Maps", ta_link:"⭐ TripAdvisor",
    copied:"Itinerario copiado ✓ pégalo donde quieras", nocopy:"No se pudo copiar automáticamente",
    dl_unav:"La descarga no está disponible en esta vista. Ábrelo desde claude.ai.",
    f_tips:"Consejos", f_stay:"Alojamiento", f_note:'Generado con Rumbo · verifica horarios y precios antes de reservar. Consejo: usa "Imprimir → Guardar como PDF".',
@@ -420,6 +426,7 @@ const T={
    ed_addact:"➕ Activity", ed_addday:"➕ Add day",
    ph_daytitle:"Day title", ph_name:"Place or restaurant name", ph_det:"Detail (1 sentence)", ph_moment:"Time",
    ty_ver:"See", ty_comer:"Eat", ty_mover:"Transport",
+   map_link:"🗺 View on Maps", ta_link:"⭐ TripAdvisor",
    copied:"Itinerary copied ✓ paste it wherever you want", nocopy:"Couldn't copy automatically",
    dl_unav:"Download isn't available in this view. Open it from claude.ai.",
    f_tips:"Tips", f_stay:"Accommodation", f_note:'Made with Rumbo · check times and prices before booking. Tip: use "Print → Save as PDF".',
@@ -715,9 +722,18 @@ function render(data,ctx,L0){
       const cls=(a.tipo==="comer"?"comer ":"")+(a.must?"must":"");
       const pr=Number(a.precio);
       const prTag=(!isNaN(pr)&&pr>0)?` <span class="price">~${Math.round(pr)}€</span>`:"";
+      let links="";
+      if(a.nombre&&a.tipo!=="mover"){
+        const q=encodeURIComponent(a.nombre+" "+ctx.dest);
+        const gmap=`https://www.google.com/maps/search/?api=1&query=${q}`;
+        const ta=`https://www.tripadvisor.com/Search?q=${q}`;
+        links=`<div class="links">
+          <a href="${gmap}" target="_blank" rel="noopener">${L.map_link}</a>
+          <a href="${ta}" target="_blank" rel="noopener">${L.ta_link}</a></div>`;
+      }
       h+=`<div class="act ${cls}"><div class="icn">${icon(a)}</div>
         <div class="c"><h4>${esc(a.nombre)}${a.must?' <span class="star">★</span>':""}${prTag}<span class="when">${esc(a.momento||"")}</span></h4>
-        <p>${esc(a.detalle||"")}</p></div></div>`;});
+        <p>${esc(a.detalle||"")}</p>${links}</div></div>`;});
     h+=`</div>`;});
   h+=`</div>`;
   if(Array.isArray(data.consejos)&&data.consejos.length)
@@ -896,7 +912,12 @@ async function download(data,ctx,L0){
     body+=`<div class="day"><h2>${L0==="en"?"Day":"Día"} ${i+1} · ${esc(d.titulo||"")} <span>${fmt(date)}</span></h2>`;
     (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
       const pr=Number(a.precio);const pt=(!isNaN(pr)&&pr>0)?` <b>~${Math.round(pr)}€</b>`:"";
-      body+=`<div class="act"><b>${esc(a.momento||"")}</b> — <b>${esc(a.nombre)}</b>${a.must?" ★":""}${pt}<br><span>${esc(a.detalle||"")}</span></div>`;});
+      let ml="";
+      if(a.nombre&&a.tipo!=="mover"){
+        const q=encodeURIComponent(a.nombre+" "+ctx.dest);
+        ml=` · <a href="https://www.google.com/maps/search/?api=1&query=${q}">${L.map_link}</a>`;
+      }
+      body+=`<div class="act"><b>${esc(a.momento||"")}</b> — <b>${esc(a.nombre)}</b>${a.must?" ★":""}${pt}${ml}<br><span>${esc(a.detalle||"")}</span></div>`;});
     body+=`</div>`;});
   if(Array.isArray(data.consejos)&&data.consejos.length)
     body+=`<div class="tips"><h2>${L.f_tips}</h2><ul>${data.consejos.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`;

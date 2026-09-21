@@ -23,18 +23,19 @@
   }
   *{box-sizing:border-box}
   body{background:var(--bg);color:var(--ink);
-    font-family:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     line-height:1.5;-webkit-font-smoothing:antialiased}
   .wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0}
-  h1,h2,h3,h4{font-family:"Bricolage Grotesque",Georgia,serif;font-weight:600;
-    text-wrap:balance;margin:0;letter-spacing:-.01em}
-  .mono{font-family:"DM Mono","SF Mono",ui-monospace,monospace}
-  .eyebrow{font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;
+  h1,h2,h3,h4{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:700;
+    text-wrap:balance;margin:0;letter-spacing:-.02em}
+  .price-tag,.price,.tc-price,.trip-head .meta{font-variant-numeric:tabular-nums}
+  .mono{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  .eyebrow{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:.14em;
     font-size:10.5px;color:var(--muted)}
 
   header{padding-block:26px 4px}
   .toprow{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .kicker{display:inline-flex;align-items:center;gap:7px;font-family:"DM Mono",monospace;
+  .kicker{display:inline-flex;align-items:center;gap:7px;font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
     background:var(--accent-soft);padding:5px 11px;border-radius:999px}
   .kicker .live{width:6px;height:6px;border-radius:50%;background:var(--accent)}
@@ -42,7 +43,7 @@
   .langsw button{font:inherit;font-size:12px;font-weight:600;border:none;background:transparent;
     color:var(--ink-soft);padding:6px 12px;cursor:pointer}
   .langsw button[aria-pressed="true"]{background:var(--accent);color:#fff}
-  h1.logo{font-size:38px;margin-top:14px}
+  h1.logo{font-size:38px;margin-top:14px;font-weight:800;letter-spacing:-.03em}
   h1.logo b{color:var(--accent)}
   .tagline{color:var(--ink-soft);margin-top:8px;font-size:15.5px;max-width:52ch}
 
@@ -82,10 +83,10 @@
 
   .trip-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:4px}
   .trip-head h2{font-size:27px}
-  .trip-head .meta{font-family:"DM Mono",monospace;font-size:12px;color:var(--muted)}
-  .trip-head .price-tag{margin-left:auto;font-family:"DM Mono",monospace;font-size:12px;font-weight:500;
+  .trip-head .meta{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;color:var(--muted)}
+  .trip-head .price-tag{margin-left:auto;font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;font-weight:500;
     color:var(--ok);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
-  .act .c h4 .price{font-family:"DM Mono",monospace;font-size:10.5px;font-weight:500;color:var(--ok);
+  .act .c h4 .price{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:10.5px;font-weight:500;color:var(--ok);
     background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
   .resumen{color:var(--ink-soft);font-size:15px;margin:6px 0 4px;max-width:60ch}
 
@@ -95,16 +96,16 @@
   .day-dot{position:absolute;left:-9px;top:2px;width:16px;height:16px;border-radius:50%;
     background:var(--accent);border:3px solid var(--card);box-shadow:0 0 0 1px var(--line)}
   .day-h{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
-  .day-h .n{font-family:"DM Mono",monospace;font-size:11px;color:var(--accent);font-weight:500}
+  .day-h .n{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:11px;color:var(--accent);font-weight:500}
   .day-h h3{font-size:17px}
-  .day-h .date{margin-left:auto;font-size:11px;color:var(--muted);font-family:"DM Mono",monospace}
+  .day-h .date{margin-left:auto;font-size:11px;color:var(--muted);font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
   .act{display:flex;gap:12px;padding:11px 0 3px}
   .act .icn{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
     font-size:14px;background:var(--accent-soft)}
   .act.comer .icn{background:var(--warm-soft)}
   .act.must .icn{background:var(--warm-soft);box-shadow:0 0 0 2px var(--warm)}
   .act .c h4{font-size:14.5px;font-family:inherit;font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-  .act .c h4 .when{font-family:"DM Mono",monospace;font-size:10px;text-transform:uppercase;
+  .act .c h4 .when{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:10px;text-transform:uppercase;
     letter-spacing:.06em;color:var(--muted);font-weight:500}
   .ic{width:16px;height:16px;display:block}
   .act .icn .ic{color:var(--accent)}
@@ -114,7 +115,7 @@
   .act .c h4 .star .ic{width:12px;height:12px;color:var(--warm)}
   .act .c p{margin:2px 0 0;font-size:13.5px;color:var(--ink-soft)}
   .act .c .links{display:flex;gap:8px;margin-top:5px;flex-wrap:wrap}
-  .act .c .links a{font-family:"DM Mono",monospace;font-size:10.5px;font-weight:500;
+  .act .c .links a{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:10.5px;font-weight:500;
     color:var(--accent);text-decoration:none;border:1px solid var(--line);
     border-radius:7px;padding:2px 8px;background:var(--bg)}
   .act .c .links a:hover{border-color:var(--accent)}
@@ -129,7 +130,7 @@
   .ed-day{background:var(--card);border:1px solid var(--line);border-radius:14px;
     box-shadow:var(--shadow);padding:14px;margin-top:12px}
   .ed-day-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-  .ed-daynum{font-family:"DM Mono",monospace;font-size:11px;color:var(--accent);font-weight:500}
+  .ed-daynum{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:11px;color:var(--accent);font-weight:500}
   .ed-daybtns{display:flex;gap:4px}
   .ed-b{font:inherit;font-size:12px;line-height:1;width:28px;height:28px;padding:0;cursor:pointer;
     border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink-soft)}
@@ -177,13 +178,13 @@
   .comm-filters #f-dest{flex:1;min-width:140px}
   .comm-filters #f-price{width:170px}
   .tc-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-  .tc-price{flex:none;font-family:"DM Mono",monospace;font-size:10.5px;font-weight:500;color:var(--ok);
+  .tc-price{flex:none;font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:10.5px;font-weight:500;color:var(--ok);
     background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap}
   #comm-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tripcard{background:var(--card);border:1px solid var(--line);border-radius:14px;
     box-shadow:var(--shadow);padding:15px;display:flex;flex-direction:column;gap:6px}
   .tripcard h3{font-size:16px}
-  .tripcard .tc-meta{font-family:"DM Mono",monospace;font-size:11px;color:var(--muted)}
+  .tripcard .tc-meta{font-family:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:11px;color:var(--muted)}
   .tripcard .tc-res{font-size:13px;color:var(--ink-soft);flex:1;
     display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
   .tripcard .tc-copy{font:inherit;font-size:12.5px;font-weight:600;margin-top:2px;
@@ -199,7 +200,7 @@
   footer{color:var(--muted);font-size:11.5px;text-align:center;padding:26px 0 40px;line-height:1.7}
   @media(max-width:540px){.grid{grid-template-columns:1fr}}
 </style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
 
 <div class="wrap">
   <header>

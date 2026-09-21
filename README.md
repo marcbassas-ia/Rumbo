@@ -34,6 +34,15 @@ Artifact en vivo: https://claude.ai/artifact/5Y3tqqP6sJAmmL5sN8KEMW
 - Freemium: plan básico gratis, versión completa/PDF de pago.
 
 ## Pendiente / próximos pasos
-- Editor manual del itinerario (arrastrar/reescribir a mano).
+
+### ⭐ PRIORITARIO — Editor manual del itinerario
+Poder editar el plan a mano después de generarlo, sin regenerar todo:
+- Editar el texto de cada actividad (nombre, momento, detalle).
+- Añadir o borrar actividades y días.
+- Reordenar (mover una parada a otro día / cambiar el orden).
+- Que los cambios se reflejen al descargar, compartir y publicar en la comunidad.
+(Petición del usuario que quedó pendiente; retomar aquí.)
+
+### Otros
 - Comunidad pública real (backend propio, hoy es interna de la organización).
 - Alta en programas de afiliados y pegar los IDs en la config `AFF`.

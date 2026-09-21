@@ -114,6 +114,32 @@
   .tips .eyebrow{color:var(--accent);margin-bottom:8px}
   .tips ul{margin:0;padding-left:18px}.tips li{font-size:13.5px;margin:5px 0}
 
+  .ed-hint{font-size:12.5px;color:var(--ink-soft);background:var(--accent-soft);
+    border-radius:10px;padding:10px 13px;margin:12px 0 16px}
+  .ed-day{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:14px;margin-top:12px}
+  .ed-day-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .ed-daynum{font-family:"DM Mono",monospace;font-size:11px;color:var(--accent);font-weight:500}
+  .ed-daybtns{display:flex;gap:4px}
+  .ed-b{font:inherit;font-size:12px;line-height:1;width:28px;height:28px;padding:0;cursor:pointer;
+    border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink-soft)}
+  .ed-b:hover{border-color:var(--accent);color:var(--accent)}
+  .ed-b.del:hover{border-color:var(--warm);color:var(--warm)}
+  .ed-b.on{background:var(--warm-soft);color:var(--warm);border-color:var(--warm)}
+  .ed-in{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);
+    border:1px solid var(--line);border-radius:9px;padding:8px 10px;width:100%}
+  .ed-in:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .ed-title{font-weight:700;margin-bottom:8px}
+  .ed-act{border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;
+    display:flex;flex-direction:column;gap:7px}
+  .ed-act-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .ed-act-row .ed-moment{flex:1 1 90px;min-width:80px}
+  .ed-act-row .ed-type{flex:0 0 110px}
+  .ed-act-row .ed-price-in{flex:0 0 74px}
+  .ed-add{font:inherit;font-size:12.5px;font-weight:600;margin-top:10px;cursor:pointer;
+    border:1px dashed var(--line);border-radius:9px;padding:8px 12px;background:transparent;color:var(--ink-soft)}
+  .ed-add:hover{border-color:var(--accent);color:var(--accent)}
+  .ed-addday{display:block;width:100%;margin-top:14px;padding:12px}
   .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
   .ghost{font:inherit;font-size:13px;font-weight:600;padding:10px 15px;border-radius:11px;
     border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
@@ -294,6 +320,7 @@ const $=s=>document.querySelector(s);
 /* ─── i18n ─── */
 let lang="es";
 let dbReady=false;
+let editing=false,curData=null,curCtx=null,curL="es";
 const T={
  es:{kicker:"Itinerarios con IA",
    tagline:"Dinos a dónde vas, cuándo y con quién. Claude te monta un plan día a día: qué ver, dónde comer y cómo moverte.",
@@ -335,6 +362,11 @@ const T={
    filt_dest:"Buscar destino…", filt_price:"Precio máx. €/persona", filt_sort:"Ordenar",
    sort_new:"Más recientes", sort_cheap:"Más baratos", sort_exp:"Más caros",
    comm_none_f:"Ningún viaje cumple el filtro. Sube el precio o cambia el destino.",
+   ed_edit:"✏️ Editar a mano", ed_done:"✓ Hecho",
+   ed_hint:"Edita textos y precios, reordena con ▲▼, marca imprescindibles con ★, y añade o borra actividades y días. Al terminar, pulsa Hecho.",
+   ed_addact:"➕ Actividad", ed_addday:"➕ Añadir día",
+   ph_daytitle:"Título del día", ph_name:"Nombre del sitio o restaurante", ph_det:"Detalle (1 frase)", ph_moment:"Momento",
+   ty_ver:"Ver", ty_comer:"Comer", ty_mover:"Transporte",
    copied:"Itinerario copiado ✓ pégalo donde quieras", nocopy:"No se pudo copiar automáticamente",
    dl_unav:"La descarga no está disponible en esta vista. Ábrelo desde claude.ai.",
    f_tips:"Consejos", f_stay:"Alojamiento", f_note:'Generado con Rumbo · verifica horarios y precios antes de reservar. Consejo: usa "Imprimir → Guardar como PDF".',
@@ -383,6 +415,11 @@ const T={
    filt_dest:"Search destination…", filt_price:"Max price €/person", filt_sort:"Sort",
    sort_new:"Newest", sort_cheap:"Cheapest", sort_exp:"Most expensive",
    comm_none_f:"No trips match the filter. Raise the price or change the destination.",
+   ed_edit:"✏️ Edit by hand", ed_done:"✓ Done",
+   ed_hint:"Edit text and prices, reorder with ▲▼, mark must-dos with ★, and add or remove activities and days. When finished, press Done.",
+   ed_addact:"➕ Activity", ed_addday:"➕ Add day",
+   ph_daytitle:"Day title", ph_name:"Place or restaurant name", ph_det:"Detail (1 sentence)", ph_moment:"Time",
+   ty_ver:"See", ty_comer:"Eat", ty_mover:"Transport",
    copied:"Itinerary copied ✓ paste it wherever you want", nocopy:"Couldn't copy automatically",
    dl_unav:"Download isn't available in this view. Open it from claude.ai.",
    f_tips:"Tips", f_stay:"Accommodation", f_note:'Made with Rumbo · check times and prices before booking. Tip: use "Print → Save as PDF".',
@@ -517,6 +554,7 @@ function copyTrip(v){
   $("#stay").value=v.stay||"";
   $("#musts").value=v.musts||"";
   const from=new Date(v.ci);
+  editing=false;
   render(v.data,{dest:v.dest,days:v.days,people:v.people,who:v.who,from,ci:v.ci,co:v.co,
     stay:v.stay,musts:v.musts,styleIds:v.styleIds||[],paceId:v.paceId,whoId:v.whoId,lang:v.lang},v.lang||lang);
   toast(t("copied_trip"));
@@ -564,6 +602,7 @@ async function generate(fresh){
     const data=await sample.json(prompt,{modelTier:"default",signal:ctl.signal,cache:fresh?false:true,
       onText:()=>{const b=$("#st-b");if(b)b.textContent=L.st_write;}});
     clearInterval(rot);
+    editing=false;
     render(data,{dest,days,people,who,from,ci,co,stay,musts,
       styleIds:[...selStyles],paceId:selPace,whoId:selWho,lang},lang);
   }catch(e){
@@ -652,6 +691,8 @@ function tripTotal(data){
   return Math.round(s);
 }
 function render(data,ctx,L0){
+  curData=data;curCtx=ctx;curL=L0;
+  if(editing)return renderEditor(data,ctx,L0);
   const L=T[L0];
   const dias=Array.isArray(data.dias)?data.dias:[];
   const loc=L0==="en"?"en-US":"es-ES";
@@ -684,6 +725,7 @@ function render(data,ctx,L0){
       data.consejos.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`;
   const canPub=dbReady;
   h+=`<div class="actions">
+      <button class="ghost" id="edit">${L.ed_edit}</button>
       <button class="ghost" id="regen">${L.regen}</button>
       <button class="ghost" id="share">${L.share}</button>
       <button class="ghost" id="dl">${L.dl}</button>
@@ -705,11 +747,96 @@ function render(data,ctx,L0){
       <a class="btn" href="${cars}" target="_blank" rel="noopener sponsored">${L.aff_car}<small>${carS}</small></a>
     </div></div>`;
   $("#out").innerHTML=h;
+  $("#edit").onclick=()=>{editing=true;render(curData,curCtx,curL);};
   $("#regen").onclick=()=>generate(true);
   $("#share").onclick=()=>share(data,ctx,L0);
   $("#dl").onclick=()=>download(data,ctx,L0);
   if($("#pub"))$("#pub").onclick=()=>publishTrip(data,ctx);
   $("#out").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function renderEditor(data,ctx,L0){
+  const L=T[L0];
+  const ea=s=>esc(s).replace(/"/g,"&quot;");
+  const loc=L0==="en"?"en-US":"es-ES";
+  const fmt=d=>d.toLocaleDateString(loc,{weekday:"short",day:"numeric",month:"short"});
+  const total=tripTotal(data);
+  const totalTxt=total>0?`💶 ≈${total}€ ${L.per_person}`:L.free;
+  const nd=(data.dias||[]).length;
+  let h=`<div class="trip-head"><h2>${esc(ctx.dest)}</h2>
+     <span class="meta">${nd} ${pl(nd,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)}</span>
+     <span class="price-tag">${totalTxt}</span></div>
+   <p class="ed-hint">${L.ed_hint}</p>`;
+  const tsel=(a,i,j)=>{const o=(v,l)=>`<option value="${v}"${a.tipo===v?" selected":""}>${l}</option>`;
+    return `<select class="ed-in ed-type" data-di="${i}" data-ai="${j}" data-f="tipo">${o("ver",L.ty_ver)}${o("comer",L.ty_comer)}${o("mover",L.ty_mover)}</select>`;};
+  (data.dias||[]).forEach((d,i)=>{
+    const date=new Date(ctx.from);date.setDate(date.getDate()+i);
+    h+=`<div class="ed-day">
+      <div class="ed-day-h">
+        <span class="ed-daynum">${L0==="en"?"DAY":"DÍA"} ${i+1} · ${fmt(date)}</span>
+        <span class="ed-daybtns">
+          <button class="ed-b" data-act="dayup" data-di="${i}">▲</button>
+          <button class="ed-b" data-act="daydown" data-di="${i}">▼</button>
+          <button class="ed-b del" data-act="daydel" data-di="${i}">🗑</button>
+        </span>
+      </div>
+      <input class="ed-in ed-title" data-di="${i}" data-f="titulo" value="${ea(d.titulo||"")}" placeholder="${L.ph_daytitle}">`;
+    (d.actividades||[]).forEach((a,j)=>{
+      h+=`<div class="ed-act">
+        <div class="ed-act-row">
+          <input class="ed-in ed-moment" data-di="${i}" data-ai="${j}" data-f="momento" value="${ea(a.momento||"")}" placeholder="${L.ph_moment}">
+          ${tsel(a,i,j)}
+          <input type="number" min="0" class="ed-in ed-price-in" data-di="${i}" data-ai="${j}" data-f="precio" value="${a.precio!=null&&a.precio!==""?Number(a.precio):""}" placeholder="€">
+          <button class="ed-b${a.must?" on":""}" data-act="must" data-di="${i}" data-ai="${j}">★</button>
+          <button class="ed-b" data-act="up" data-di="${i}" data-ai="${j}">▲</button>
+          <button class="ed-b" data-act="down" data-di="${i}" data-ai="${j}">▼</button>
+          <button class="ed-b del" data-act="del" data-di="${i}" data-ai="${j}">🗑</button>
+        </div>
+        <input class="ed-in ed-name" data-di="${i}" data-ai="${j}" data-f="nombre" value="${ea(a.nombre||"")}" placeholder="${L.ph_name}">
+        <input class="ed-in ed-det" data-di="${i}" data-ai="${j}" data-f="detalle" value="${ea(a.detalle||"")}" placeholder="${L.ph_det}">
+      </div>`;});
+    h+=`<button class="ed-add" data-act="addact" data-di="${i}">${L.ed_addact}</button></div>`;
+  });
+  h+=`<button class="ed-add ed-addday" data-act="addday">${L.ed_addday}</button>
+    <div class="actions"><button class="ghost" id="ed-done">${L.ed_done}</button></div>`;
+  $("#out").innerHTML=h;
+  $("#out").querySelectorAll(".ed-in").forEach(el=>{
+    const handler=()=>{
+      const di=+el.dataset.di,f=el.dataset.f,day=curData.dias[di];if(!day)return;
+      if(el.dataset.ai===undefined){day[f]=el.value;}
+      else{const a=(day.actividades||[])[+el.dataset.ai];if(!a)return;
+        a[f]=f==="precio"?(el.value===""?0:parseFloat(el.value)||0):el.value;}
+    };
+    el.oninput=handler;el.onchange=handler;
+  });
+  $("#out").querySelectorAll("[data-act]").forEach(b=>{
+    b.onclick=()=>edOp(b.dataset.act,+b.dataset.di,b.dataset.ai!==undefined?+b.dataset.ai:null);
+  });
+  $("#ed-done").onclick=()=>{editing=false;curCtx.days=curData.dias.length;render(curData,curCtx,curL);};
+}
+
+function edOp(act,di,ai){
+  const D=curData.dias;
+  if(act==="addday"){D.push({titulo:"",actividades:[]});}
+  else if(act==="dayup"){if(di>0)[D[di-1],D[di]]=[D[di],D[di-1]];}
+  else if(act==="daydown"){if(di<D.length-1)[D[di+1],D[di]]=[D[di],D[di+1]];}
+  else if(act==="daydel"){D.splice(di,1);}
+  else{
+    const acts=D[di].actividades||(D[di].actividades=[]);
+    if(act==="addact"){acts.push({momento:"",tipo:"ver",nombre:"",detalle:"",precio:0,must:false});}
+    else if(act==="del"){acts.splice(ai,1);}
+    else if(act==="must"){acts[ai].must=!acts[ai].must;}
+    else if(act==="up"){
+      if(ai>0){[acts[ai-1],acts[ai]]=[acts[ai],acts[ai-1]];}
+      else if(di>0){const m=acts.splice(ai,1)[0];(D[di-1].actividades=D[di-1].actividades||[]).push(m);}
+    }
+    else if(act==="down"){
+      if(ai<acts.length-1){[acts[ai+1],acts[ai]]=[acts[ai],acts[ai+1]];}
+      else if(di<D.length-1){const m=acts.splice(ai,1)[0];(D[di+1].actividades=D[di+1].actividades||[]).unshift(m);}
+    }
+  }
+  curCtx.days=curData.dias.length;
+  renderEditor(curData,curCtx,curL);
 }
 
 function toast(msg){

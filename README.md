@@ -39,13 +39,10 @@ Artifact en vivo: https://claude.ai/artifact/5Y3tqqP6sJAmmL5sN8KEMW
 
 ## Pendiente / próximos pasos
 
-### ⭐ PRIORITARIO — Editor manual del itinerario
-Poder editar el plan a mano después de generarlo, sin regenerar todo:
-- Editar el texto de cada actividad (nombre, momento, detalle).
-- Añadir o borrar actividades y días.
-- Reordenar (mover una parada a otro día / cambiar el orden).
-- Que los cambios se reflejen al descargar, compartir y publicar en la comunidad.
-(Petición del usuario que quedó pendiente; retomar aquí.)
+### ✅ HECHO — Editor manual del itinerario
+Botón "✏️ Editar a mano": editar nombre/momento/tipo/detalle/precio de cada actividad,
+reordenar con ▲▼ (incluso mover paradas entre días), marcar imprescindibles con ★,
+añadir/borrar actividades y días. Los cambios se reflejan al descargar, compartir y publicar.
 
 ### Otros
 - Comunidad pública real (backend propio, hoy es interna de la organización).

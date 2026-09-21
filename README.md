@@ -13,7 +13,11 @@ devuelve un plan con qué ver, dónde comer y cómo organizar los días.
 - **Imprescindibles**: sitios/restaurantes que se incluyen sí o sí.
 - Idioma ES / EN (interfaz e itinerario).
 - Descargar y compartir el itinerario.
-- **Comunidad**: publicar tu viaje y que otros lo copien y editen (capacidad `db`).
+- **Precios estimados**: la IA estima un precio aproximado (€/persona) por actividad y
+  calcula el total del viaje; se muestra en el itinerario, al compartir y al descargar.
+- **Comunidad (estilo Wikiloc/Strava)**: publicar tu viaje, que otros lo copien y editen,
+  con **filtros por precio máximo, orden (recientes / baratos / caros) y búsqueda por destino**
+  (capacidad `db`).
 - Enlaces afiliado-ready a Booking, Airbnb y alquiler de coche
   (config `AFF` al inicio del `<script>` en `planner.html`).
 

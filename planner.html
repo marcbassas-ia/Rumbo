@@ -83,6 +83,10 @@
   .trip-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:4px}
   .trip-head h2{font-size:27px}
   .trip-head .meta{font-family:"DM Mono",monospace;font-size:12px;color:var(--muted)}
+  .trip-head .price-tag{margin-left:auto;font-family:"DM Mono",monospace;font-size:12px;font-weight:500;
+    color:var(--ok);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+  .act .c h4 .price{font-family:"DM Mono",monospace;font-size:10.5px;font-weight:500;color:var(--ok);
+    background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
   .resumen{color:var(--ink-soft);font-size:15px;margin:6px 0 4px;max-width:60ch}
 
   .rail{position:relative;margin-top:18px;padding-left:6px}
@@ -131,6 +135,14 @@
   .comm-head{border-top:1px solid var(--line);padding-top:22px;margin-bottom:14px}
   .comm-head h2{font-size:22px}
   .comm-sub{color:var(--ink-soft);font-size:13.5px;margin:4px 0 0;max-width:56ch}
+  .comm-filters{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+  .comm-filters input,.comm-filters select{font:inherit;font-size:13.5px;padding:9px 12px;
+    border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+  .comm-filters #f-dest{flex:1;min-width:140px}
+  .comm-filters #f-price{width:170px}
+  .tc-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .tc-price{flex:none;font-family:"DM Mono",monospace;font-size:10.5px;font-weight:500;color:var(--ok);
+    background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap}
   #comm-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tripcard{background:var(--card);border:1px solid var(--line);border-radius:14px;
     box-shadow:var(--shadow);padding:15px;display:flex;flex-direction:column;gap:6px}
@@ -230,6 +242,15 @@
       <h2 data-i18n="comm_title">Viajes de la comunidad</h2>
       <p class="comm-sub" data-i18n="comm_sub">Planes publicados por otros viajeros. Copia uno y ajústalo a tu gusto.</p>
     </div>
+    <div class="comm-filters">
+      <input id="f-dest" data-i18n-ph="filt_dest" placeholder="Buscar destino…" autocomplete="off">
+      <input type="number" id="f-price" min="0" data-i18n-ph="filt_price" placeholder="Precio máx. €/persona">
+      <select id="f-sort">
+        <option value="new" data-i18n="sort_new">Más recientes</option>
+        <option value="cheap" data-i18n="sort_cheap">Más baratos</option>
+        <option value="exp" data-i18n="sort_exp">Más caros</option>
+      </select>
+    </div>
     <div id="comm-list"></div>
   </section>
 
@@ -305,11 +326,15 @@ const T={
    aff_inactive:" (Enlaces de afiliado listos: añade tu ID en la config para activarlos.)",
    aff_book:"🏨 Buscar en Booking", aff_air:"🛏️ Buscar en Airbnb", aff_link:"enlace afiliado",
    aff_car:"🚗 Alquiler de coche", aff_car_s:"búsqueda de coches",
-   comm_title:"Viajes de la comunidad", comm_sub:"Planes publicados por otros viajeros. Copia uno y ajústalo a tu gusto.",
+   comm_title:"Viajes de la comunidad", comm_sub:"Planes publicados por otros viajeros. Filtra por precio, copia uno y ajústalo a tu gusto.",
    comm_loading:"Cargando viajes…", comm_empty:"Aún no hay viajes publicados. ¡Sé el primero en compartir el tuyo!",
    publish:"🌍 Publicar en la comunidad", published:"¡Publicado en la comunidad! ✓", pub_wait:"Publicando…",
    pub_fail:"No se pudo publicar (quizá no tienes permiso de escritura aquí).",
    copy_edit:"Copiar y editar", copied_trip:"Copiado ✓ ajústalo y vuelve a generar o publicar",
+   per_person:"por persona", free:"Gratis", price_total:"Coste estimado",
+   filt_dest:"Buscar destino…", filt_price:"Precio máx. €/persona", filt_sort:"Ordenar",
+   sort_new:"Más recientes", sort_cheap:"Más baratos", sort_exp:"Más caros",
+   comm_none_f:"Ningún viaje cumple el filtro. Sube el precio o cambia el destino.",
    copied:"Itinerario copiado ✓ pégalo donde quieras", nocopy:"No se pudo copiar automáticamente",
    dl_unav:"La descarga no está disponible en esta vista. Ábrelo desde claude.ai.",
    f_tips:"Consejos", f_stay:"Alojamiento", f_note:'Generado con Rumbo · verifica horarios y precios antes de reservar. Consejo: usa "Imprimir → Guardar como PDF".',
@@ -349,11 +374,15 @@ const T={
    aff_inactive:" (Affiliate links ready: add your ID in the config to activate them.)",
    aff_book:"🏨 Search on Booking", aff_air:"🛏️ Search on Airbnb", aff_link:"affiliate link",
    aff_car:"🚗 Rent a car", aff_car_s:"car search",
-   comm_title:"Community trips", comm_sub:"Plans shared by other travelers. Copy one and tweak it to your taste.",
+   comm_title:"Community trips", comm_sub:"Plans shared by other travelers. Filter by price, copy one and tweak it to your taste.",
    comm_loading:"Loading trips…", comm_empty:"No trips published yet. Be the first to share yours!",
    publish:"🌍 Publish to community", published:"Published to the community! ✓", pub_wait:"Publishing…",
    pub_fail:"Couldn't publish (you may not have write access here).",
    copy_edit:"Copy & edit", copied_trip:"Copied ✓ tweak it and regenerate or publish",
+   per_person:"per person", free:"Free", price_total:"Estimated cost",
+   filt_dest:"Search destination…", filt_price:"Max price €/person", filt_sort:"Sort",
+   sort_new:"Newest", sort_cheap:"Cheapest", sort_exp:"Most expensive",
+   comm_none_f:"No trips match the filter. Raise the price or change the destination.",
    copied:"Itinerary copied ✓ paste it wherever you want", nocopy:"Couldn't copy automatically",
    dl_unav:"Download isn't available in this view. Open it from claude.ai.",
    f_tips:"Tips", f_stay:"Accommodation", f_note:'Made with Rumbo · check times and prices before booking. Tip: use "Print → Save as PDF".',
@@ -416,6 +445,7 @@ let dbPromise=claude.use("db").catch(()=>null);
 let ctl=null;
 dbPromise.then(db=>{dbReady=!!db;loadCommunity();});
 
+let commDocs=[];
 async function loadCommunity(){
   const db=await dbPromise;
   const sec=$("#community");
@@ -424,21 +454,37 @@ async function loadCommunity(){
   const list=$("#comm-list");
   list.innerHTML=`<div class="comm-msg">${t("comm_loading")}</div>`;
   try{
-    const snap=await db.collection("trips").orderBy("createdAt","desc").limit(30).get();
-    if(snap.empty){list.innerHTML=`<div class="comm-msg">${t("comm_empty")}</div>`;return;}
-    list.innerHTML="";
-    snap.docs.forEach(d=>{
-      const v=d.data();if(!v)return;
-      const L=T[v.lang&&T[v.lang]?v.lang:lang];
-      const card=document.createElement("div");card.className="tripcard";
-      card.innerHTML=`<h3>${esc(v.dest||"")}</h3>
-        <div class="tc-meta">${v.days} ${pl(v.days,L.day,L.days)} · ${v.people} ${pl(v.people,L.trav,L.travs)} · ${(v.lang||"es").toUpperCase()}</div>
-        <div class="tc-res">${esc(v.resumen||"")}</div>`;
-      const btn=document.createElement("button");btn.className="tc-copy";btn.textContent=t("copy_edit");
-      btn.onclick=()=>copyTrip(v);
-      card.appendChild(btn);list.appendChild(card);
-    });
-  }catch(e){list.innerHTML=`<div class="comm-msg">${t("comm_empty")}</div>`;}
+    const snap=await db.collection("trips").orderBy("createdAt","desc").limit(60).get();
+    commDocs=snap.docs.map(d=>d.data()).filter(Boolean);
+    renderComm();
+  }catch(e){commDocs=[];list.innerHTML=`<div class="comm-msg">${t("comm_empty")}</div>`;}
+}
+function renderComm(){
+  const list=$("#comm-list");if(!list)return;
+  if(!commDocs.length){list.innerHTML=`<div class="comm-msg">${t("comm_empty")}</div>`;return;}
+  const q=($("#f-dest")?.value||"").trim().toLowerCase();
+  const maxP=parseFloat($("#f-price")?.value);
+  const sort=$("#f-sort")?.value||"new";
+  let rows=commDocs.slice();
+  if(q)rows=rows.filter(v=>(v.dest||"").toLowerCase().includes(q));
+  if(!isNaN(maxP))rows=rows.filter(v=>Number(v.priceTotal||0)<=maxP);
+  if(sort==="cheap")rows.sort((a,b)=>(a.priceTotal||0)-(b.priceTotal||0));
+  else if(sort==="exp")rows.sort((a,b)=>(b.priceTotal||0)-(a.priceTotal||0));
+  else rows.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(!rows.length){list.innerHTML=`<div class="comm-msg">${t("comm_none_f")}</div>`;return;}
+  list.innerHTML="";
+  rows.forEach(v=>{
+    const L=T[v.lang&&T[v.lang]?v.lang:lang];
+    const price=Number(v.priceTotal||0);
+    const badge=price>0?`💶 ≈${Math.round(price)}€ ${L.per_person}`:L.free;
+    const card=document.createElement("div");card.className="tripcard";
+    card.innerHTML=`<div class="tc-top"><h3>${esc(v.dest||"")}</h3><span class="tc-price">${badge}</span></div>
+      <div class="tc-meta">${v.days} ${pl(v.days,L.day,L.days)} · ${v.people} ${pl(v.people,L.trav,L.travs)} · ${(v.lang||"es").toUpperCase()}</div>
+      <div class="tc-res">${esc(v.resumen||"")}</div>`;
+    const btn=document.createElement("button");btn.className="tc-copy";btn.textContent=t("copy_edit");
+    btn.onclick=()=>copyTrip(v);
+    card.appendChild(btn);list.appendChild(card);
+  });
 }
 
 async function publishTrip(data,ctx){
@@ -449,7 +495,8 @@ async function publishTrip(data,ctx){
     await db.collection("trips").add({
       dest:ctx.dest,ci:ctx.ci,co:ctx.co,people:ctx.people,who:ctx.who,whoId:ctx.whoId,
       stay:ctx.stay||"",musts:ctx.musts||"",styleIds:ctx.styleIds||[],paceId:ctx.paceId||"norm",
-      lang:ctx.lang||"es",days:ctx.days,resumen:data.resumen||"",data:data,createdAt:Date.now()
+      lang:ctx.lang||"es",days:ctx.days,resumen:data.resumen||"",data:data,
+      priceTotal:tripTotal(data),createdAt:Date.now()
     });
     toast(t("published"));
     loadCommunity();
@@ -558,10 +605,11 @@ ${lines}
 Reply with ONLY this JSON (no surrounding text):
 {"resumen":"one sentence hook for the trip",
  "dias":[{"titulo":"short day theme","actividades":[
-   {"momento":"Morning","tipo":"ver","nombre":"Real place","detalle":"Short sentence.","must":false},
-   {"momento":"Lunch","tipo":"comer","nombre":"Real restaurant","detalle":"What to order.","must":false}]}],
+   {"momento":"Morning","tipo":"ver","nombre":"Real place","detalle":"Short sentence.","precio":15,"must":false},
+   {"momento":"Lunch","tipo":"comer","nombre":"Real restaurant","detalle":"What to order.","precio":20,"must":false}]}],
  "consejos":["practical tip 1","practical tip 2","practical tip 3"]}
-tipo is "ver", "comer" or "mover". Set "must":true on any activity that fulfills a must-do the traveler requested.`;
+tipo is "ver", "comer" or "mover". Set "must":true on any activity that fulfills a must-do the traveler requested.
+"precio": approximate cost PER PERSON in EUROS for that activity (entry fee, meal, local transport). Use 0 when it's free (parks, viewpoints, strolling). A number only, realistic for ${dest}.`;
   }
   const fmt=d=>d.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
   const lines=[
@@ -589,21 +637,31 @@ ${lines}
 Responde SOLO con este JSON (sin texto alrededor):
 {"resumen":"una frase con el gancho del viaje",
  "dias":[{"titulo":"tema corto del día","actividades":[
-   {"momento":"Mañana","tipo":"ver","nombre":"Lugar real","detalle":"Frase breve.","must":false},
-   {"momento":"Comida","tipo":"comer","nombre":"Restaurante real","detalle":"Qué pedir.","must":false}]}],
+   {"momento":"Mañana","tipo":"ver","nombre":"Lugar real","detalle":"Frase breve.","precio":15,"must":false},
+   {"momento":"Comida","tipo":"comer","nombre":"Restaurante real","detalle":"Qué pedir.","precio":20,"must":false}]}],
  "consejos":["consejo práctico 1","consejo práctico 2","consejo práctico 3"]}
-tipo es "ver", "comer" o "mover". Pon "must":true en cualquier actividad que cumpla un imprescindible que pidió el viajero.`;
+tipo es "ver", "comer" o "mover". Pon "must":true en cualquier actividad que cumpla un imprescindible que pidió el viajero.
+"precio": coste aproximado POR PERSONA en EUROS de esa actividad (entrada, comida, transporte local). Usa 0 cuando es gratis (parques, miradores, pasear). Solo el número, realista para ${dest}.`;
 }
 
 function esc(s){return String(s??"").replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));}
+function tripTotal(data){
+  let s=0;(Array.isArray(data.dias)?data.dias:[]).forEach(d=>
+    (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
+      const n=Number(a.precio);if(!isNaN(n))s+=n;}));
+  return Math.round(s);
+}
 function render(data,ctx,L0){
   const L=T[L0];
   const dias=Array.isArray(data.dias)?data.dias:[];
   const loc=L0==="en"?"en-US":"es-ES";
   const fmt=d=>d.toLocaleDateString(loc,{weekday:"short",day:"numeric",month:"short"});
   const icon=a=>a.tipo==="comer"?"🍽️":a.tipo==="mover"?"🚌":a.must?"⭐":"📍";
+  const total=tripTotal(data);
+  const totalTxt=total>0?`💶 ≈${total}€ ${L.per_person}`:L.free;
   let h=`<div class="trip-head"><h2>${esc(ctx.dest)}</h2>
-    <span class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}</span></div>`;
+    <span class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}</span>
+    <span class="price-tag">${totalTxt}</span></div>`;
   if(data.resumen)h+=`<p class="resumen">${esc(data.resumen)}</p>`;
   if(ctx.stay)h+=`<p class="resumen" style="color:var(--accent);font-size:13px">📍 ${L.stay_opt}: ${esc(ctx.stay)}</p>`;
   h+=`<div class="rail">`;
@@ -614,8 +672,10 @@ function render(data,ctx,L0){
       <span class="date">${fmt(date)}</span></div>`;
     (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
       const cls=(a.tipo==="comer"?"comer ":"")+(a.must?"must":"");
+      const pr=Number(a.precio);
+      const prTag=(!isNaN(pr)&&pr>0)?` <span class="price">~${Math.round(pr)}€</span>`:"";
       h+=`<div class="act ${cls}"><div class="icn">${icon(a)}</div>
-        <div class="c"><h4>${esc(a.nombre)}${a.must?' <span class="star">★</span>':""}<span class="when">${esc(a.momento||"")}</span></h4>
+        <div class="c"><h4>${esc(a.nombre)}${a.must?' <span class="star">★</span>':""}${prTag}<span class="when">${esc(a.momento||"")}</span></h4>
         <p>${esc(a.detalle||"")}</p></div></div>`;});
     h+=`</div>`;});
   h+=`</div>`;
@@ -662,7 +722,9 @@ function shareText(data,ctx,L0){
   const L=T[L0];const loc=L0==="en"?"en-US":"es-ES";
   const fmt=d=>d.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long"});
   const dias=Array.isArray(data.dias)?data.dias:[];
+  const total=tripTotal(data);
   let s=`✈️ ${(L.sh_trip+" "+ctx.dest).toUpperCase()}\n${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${ctx.who}\n`;
+  s+=total>0?`💶 ${L.price_total}: ≈${total}€ ${L.per_person}\n`:"";
   if(data.resumen)s+=`\n${data.resumen}\n`;
   if(ctx.stay)s+=`📍 ${L.f_stay}: ${ctx.stay}\n`;
   dias.forEach((d,i)=>{
@@ -670,7 +732,8 @@ function shareText(data,ctx,L0){
     s+=`\n━━ ${L0==="en"?"DAY":"DÍA"} ${i+1} · ${d.titulo||""} (${fmt(date)}) ━━\n`;
     (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
       const ic=a.tipo==="comer"?"🍽️":a.tipo==="mover"?"🚌":a.must?"⭐":"📍";
-      s+=`${ic} ${a.momento?a.momento+": ":""}${a.nombre}\n   ${a.detalle||""}\n`;});
+      const pr=Number(a.precio);const pt=(!isNaN(pr)&&pr>0)?` (~${Math.round(pr)}€)`:"";
+      s+=`${ic} ${a.momento?a.momento+": ":""}${a.nombre}${pt}\n   ${a.detalle||""}\n`;});
   });
   if(Array.isArray(data.consejos)&&data.consejos.length)
     s+=`\n💡 ${L.sh_tips}\n`+data.consejos.map(c=>`· ${c}`).join("\n")+"\n";
@@ -697,14 +760,16 @@ async function download(data,ctx,L0){
   const loc=L0==="en"?"en-US":"es-ES";
   const fmt=d=>d.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long"});
   const dias=Array.isArray(data.dias)?data.dias:[];
-  let body=`<h1>${esc(ctx.dest)}</h1><p class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}</p>`;
+  const total=tripTotal(data);
+  let body=`<h1>${esc(ctx.dest)}</h1><p class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}${total>0?` · 💶 ≈${total}€ ${L.per_person}`:""}</p>`;
   if(data.resumen)body+=`<p class="res">${esc(data.resumen)}</p>`;
   if(ctx.stay)body+=`<p class="res">📍 ${L.f_stay}: ${esc(ctx.stay)}</p>`;
   dias.forEach((d,i)=>{
     const date=new Date(ctx.from);date.setDate(date.getDate()+i);
     body+=`<div class="day"><h2>${L0==="en"?"Day":"Día"} ${i+1} · ${esc(d.titulo||"")} <span>${fmt(date)}</span></h2>`;
     (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
-      body+=`<div class="act"><b>${esc(a.momento||"")}</b> — <b>${esc(a.nombre)}</b>${a.must?" ★":""}<br><span>${esc(a.detalle||"")}</span></div>`;});
+      const pr=Number(a.precio);const pt=(!isNaN(pr)&&pr>0)?` <b>~${Math.round(pr)}€</b>`:"";
+      body+=`<div class="act"><b>${esc(a.momento||"")}</b> — <b>${esc(a.nombre)}</b>${a.must?" ★":""}${pt}<br><span>${esc(a.detalle||"")}</span></div>`;});
     body+=`</div>`;});
   if(Array.isArray(data.consejos)&&data.consejos.length)
     body+=`<div class="tips"><h2>${L.f_tips}</h2><ul>${data.consejos.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`;
@@ -727,4 +792,6 @@ async function download(data,ctx,L0){
 }
 
 $("#go").onclick=()=>generate(false);
+["f-dest","f-price"].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=renderComm;});
+{const fs=document.getElementById("f-sort");if(fs)fs.onchange=renderComm;}
 </script>

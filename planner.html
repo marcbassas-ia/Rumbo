@@ -1,4 +1,4 @@
-<title>Rumbo · Viajes con IA</title>
+<title>Nómada · Viajes con IA</title>
 <style>
   :root{
     --bg:#EEF1F6; --card:#FFFFFF; --ink:#0F1523; --ink-soft:#525C74;
@@ -106,7 +106,12 @@
   .act .c h4{font-size:14.5px;font-family:inherit;font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
   .act .c h4 .when{font-family:"DM Mono",monospace;font-size:10px;text-transform:uppercase;
     letter-spacing:.06em;color:var(--muted);font-weight:500}
-  .act .c h4 .star{color:var(--warm);font-size:11px;font-weight:700}
+  .ic{width:16px;height:16px;display:block}
+  .act .icn .ic{color:var(--accent)}
+  .act.comer .icn .ic{color:var(--warm)}
+  .act.must .icn .ic{color:var(--warm)}
+  .act .c h4 .star{display:inline-flex}
+  .act .c h4 .star .ic{width:12px;height:12px;color:var(--warm)}
   .act .c p{margin:2px 0 0;font-size:13.5px;color:var(--ink-soft)}
   .act .c .links{display:flex;gap:8px;margin-top:5px;flex-wrap:wrap}
   .act .c .links a{font-family:"DM Mono",monospace;font-size:10.5px;font-weight:500;
@@ -205,7 +210,7 @@
         <button id="lang-en" aria-pressed="false">EN</button>
       </span>
     </div>
-    <h1 class="logo">Rumbo<b>.</b></h1>
+    <h1 class="logo">Nómada<b>.</b></h1>
     <p class="tagline" data-i18n="tagline">Dinos a dónde vas, cuándo y con quién. Claude te monta un plan día a día: qué ver, dónde comer y cómo moverte.</p>
   </header>
 
@@ -213,7 +218,8 @@
     <div class="grid">
       <div class="field full">
         <label for="dest" data-i18n="l_dest">¿A dónde vas?</label>
-        <input id="dest" data-i18n-ph="ph_dest" placeholder="Roma, Tokio, Costa Rica, Andalucía…" value="Lisboa, Portugal" autocomplete="off">
+        <input id="dest" list="destlist" data-i18n-ph="ph_dest" placeholder="Roma, Tokio, Costa Rica, Andalucía…" value="Lisboa, Portugal" autocomplete="off">
+        <datalist id="destlist"></datalist>
       </div>
       <div class="field">
         <label for="from" data-i18n="l_from">Fecha de ida</label>
@@ -242,18 +248,19 @@
 
       <div class="field full">
         <label for="musts" data-i18n="l_musts">Imprescindibles (sí o sí)</label>
-        <input id="musts" data-i18n-ph="ph_musts" placeholder="Sagrada Família, cenar en El Xampanyet…" autocomplete="off">
+        <input id="musts" list="placelist" data-i18n-ph="ph_musts" placeholder="Sagrada Família, cenar en El Xampanyet…" autocomplete="off">
+        <datalist id="placelist"></datalist>
         <span class="hint" data-i18n="h_musts">Sitios o restaurantes que quieres seguro: el plan los incluirá el día que mejor encaje.</span>
       </div>
 
       <div class="field full sub"><span class="eyebrow" data-i18n="sub_transport">Transporte y alojamiento · opcional</span></div>
       <div class="field">
-        <label for="arr" data-i18n="l_arr">Llegas el primer día a las…</label>
-        <input type="time" id="arr">
+        <label for="arr" data-i18n="l_arr">Llegada el primer día</label>
+        <input type="text" id="arr" inputmode="numeric" maxlength="5" placeholder="18:00" autocomplete="off">
       </div>
       <div class="field">
-        <label for="dep" data-i18n="l_dep">Te vas el último día a las…</label>
-        <input type="time" id="dep">
+        <label for="dep" data-i18n="l_dep">Salida el último día</label>
+        <input type="text" id="dep" inputmode="numeric" maxlength="5" placeholder="11:00" autocomplete="off">
       </div>
       <div class="field full">
         <label for="stay" data-i18n="l_stay">¿Dónde te alojas?</label>
@@ -262,7 +269,7 @@
       </div>
 
       <div class="err" id="err" hidden></div>
-      <button class="go" id="go" data-i18n="btn_go">✦ Crear mi itinerario</button>
+      <button class="go" id="go" data-i18n="btn_go">Crear itinerario</button>
     </div>
   </div>
 
@@ -328,112 +335,112 @@ let dbReady=false;
 let editing=false,curData=null,curCtx=null,curL="es";
 const T={
  es:{kicker:"Itinerarios con IA",
-   tagline:"Dinos a dónde vas, cuándo y con quién. Claude te monta un plan día a día: qué ver, dónde comer y cómo moverte.",
+   tagline:"Dinos a dónde vas, cuándo y con quién. La IA te monta un plan día a día: qué ver, dónde comer y cómo moverte.",
    l_dest:"¿A dónde vas?", ph_dest:"Roma, Tokio, Costa Rica, Andalucía…",
    l_from:"Fecha de ida", l_to:"Fecha de vuelta", l_people:"¿Cuántos sois?", l_who:"¿Con quién?",
    l_styles:"¿Qué te apetece?", l_pace:"Ritmo",
-   l_musts:"Imprescindibles (sí o sí)", ph_musts:"Sagrada Família, cenar en El Xampanyet…",
+   l_musts:"Imprescindibles", ph_musts:"Sagrada Família, cenar en El Xampanyet…",
    h_musts:"Sitios o restaurantes que quieres seguro: el plan los incluirá el día que mejor encaje.",
    sub_transport:"Transporte y alojamiento · opcional",
-   l_arr:"Llegas el primer día a las…", l_dep:"Te vas el último día a las…",
+   l_arr:"Llegada el primer día", l_dep:"Salida el último día",
    l_stay:"¿Dónde te alojas?", ph_stay:"Barrio o dirección (ej. cerca de la Plaza Mayor) — o déjalo vacío",
-   h_stay:"Si lo rellenas, Rumbo agrupa cada día por cercanía para que pierdas menos tiempo en desplazamientos.",
-   btn_go:"✦ Crear mi itinerario",
-   foot1:"Rumbo · prototipo · los planes los genera Claude — verifica horarios, precios y disponibilidad antes de reservar.",
+   h_stay:"Si lo rellenas, Nómada agrupa cada día por cercanía para que pierdas menos tiempo en desplazamientos.",
+   btn_go:"Crear itinerario",
+   foot1:"Nómada · prototipo · los planes los genera la IA — verifica horarios, precios y disponibilidad antes de reservar.",
    foot2:"Los botones de reserva son marcadores del futuro enlace de afiliación (Booking / Civitatis / GetYourGuide).",
    st_think:"Pensando el viaje…", st_write:"Escribiendo tu itinerario…", stop:"Parar",
    msgs:["Buscando los mejores sitios…","Ordenando el itinerario día a día…","Encajando tus imprescindibles…","Eligiendo dónde comer…","Ajustando el ritmo del viaje…"],
-   ai_unav_t:"La IA no está disponible aquí", ai_unav_d:"Abre esta página desde claude.ai y acepta cuando te pida usar Claude. En una vista previa sin sesión no puede generar.",
+   ai_unav_t:"La IA no está disponible aquí", ai_unav_d:"Abre esta página desde claude.ai y acepta cuando te pida usar la IA. En una vista previa sin sesión no puede generar.",
    e_dest:"Escribe un destino.", e_dates:"Elige las dos fechas.", e_return:"La vuelta debe ser posterior a la ida.", e_max:"Prueba viajes de hasta 14 días.",
-   e_notgr:"Necesitas permitir que la página use Claude. Recárgala y acepta el aviso.",
+   e_notgr:"Necesitas permitir que la página use la IA. Recárgala y acepta el aviso.",
    e_rate:"Demasiadas peticiones seguidas. Espera un momento y vuelve a intentarlo.",
    e_json:"La respuesta no salió bien. Prueba otra vez o cambia algún dato.",
-   e_ref:"Prueba a reformular el destino o los intereses.", e_sess:"Tu sesión de Claude ha caducado, vuelve a entrar.",
+   e_ref:"Prueba a reformular el destino o los intereses.", e_sess:"Tu sesión ha caducado, vuelve a entrar.",
    e_gen:"Algo falló al generar. Inténtalo de nuevo en un momento.",
    day:"día", days:"días", trav:"viajero", travs:"viajeros",
    stay_opt:"Optimizado alrededor de tu alojamiento",
-   tips_for:"Consejos para", regen:"↻ Otra versión", share:"↗ Compartir", dl:"⬇ Descargar itinerario", dl_wait:"Preparando…",
-   aff_eye:"🏨 ¿Aún no tienes alojamiento?", aff_h:"Apartamentos en",
+   tips_for:"Consejos para", regen:"Otra versión", share:"Compartir", dl:"Descargar", dl_wait:"Preparando…",
+   aff_eye:"¿Aún no tienes alojamiento?", aff_h:"Apartamentos en",
    aff_active:" Cada reserva desde aquí te genera comisión, sin coste para el viajero.",
    aff_inactive:" (Enlaces de afiliado listos: añade tu ID en la config para activarlos.)",
-   aff_book:"🏨 Buscar en Booking", aff_air:"🛏️ Buscar en Airbnb", aff_link:"enlace afiliado",
-   aff_car:"🚗 Alquiler de coche", aff_car_s:"búsqueda de coches",
+   aff_book:"Buscar en Booking", aff_air:"Buscar en Airbnb", aff_link:"enlace afiliado",
+   aff_car:"Alquiler de coche", aff_car_s:"búsqueda de coches",
    comm_title:"Viajes de la comunidad", comm_sub:"Planes publicados por otros viajeros. Filtra por precio, copia uno y ajústalo a tu gusto.",
-   comm_loading:"Cargando viajes…", comm_empty:"Aún no hay viajes publicados. ¡Sé el primero en compartir el tuyo!",
-   publish:"🌍 Publicar en la comunidad", published:"¡Publicado en la comunidad! ✓", pub_wait:"Publicando…",
+   comm_loading:"Cargando viajes…", comm_empty:"Aún no hay viajes publicados. Sé el primero en compartir el tuyo.",
+   publish:"Publicar", published:"Publicado en la comunidad", pub_wait:"Publicando…",
    pub_fail:"No se pudo publicar (quizá no tienes permiso de escritura aquí).",
-   copy_edit:"Copiar y editar", copied_trip:"Copiado ✓ ajústalo y vuelve a generar o publicar",
+   copy_edit:"Copiar y editar", copied_trip:"Copiado — ajústalo y vuelve a generar o publicar",
    per_person:"por persona", free:"Gratis", price_total:"Coste estimado",
    filt_dest:"Buscar destino…", filt_price:"Precio máx. €/persona", filt_sort:"Ordenar",
    sort_new:"Más recientes", sort_cheap:"Más baratos", sort_exp:"Más caros",
    comm_none_f:"Ningún viaje cumple el filtro. Sube el precio o cambia el destino.",
-   ed_edit:"✏️ Editar a mano", ed_done:"✓ Hecho",
-   ed_hint:"Edita textos y precios, reordena con ▲▼, marca imprescindibles con ★, y añade o borra actividades y días. Al terminar, pulsa Hecho.",
-   ed_addact:"➕ Actividad", ed_addday:"➕ Añadir día",
+   ed_edit:"Editar a mano", ed_done:"Hecho",
+   ed_hint:"Edita textos y precios, reordena con las flechas, marca imprescindibles, y añade o borra actividades y días. Al terminar, pulsa Hecho.",
+   ed_addact:"Añadir actividad", ed_addday:"Añadir día",
    ph_daytitle:"Título del día", ph_name:"Nombre del sitio o restaurante", ph_det:"Detalle (1 frase)", ph_moment:"Momento",
    ty_ver:"Ver", ty_comer:"Comer", ty_mover:"Transporte",
-   map_link:"🗺 Ver en Maps", ta_link:"⭐ TripAdvisor",
-   copied:"Itinerario copiado ✓ pégalo donde quieras", nocopy:"No se pudo copiar automáticamente",
+   map_link:"Google Maps", ta_link:"TripAdvisor",
+   copied:"Itinerario copiado — pégalo donde quieras", nocopy:"No se pudo copiar automáticamente",
    dl_unav:"La descarga no está disponible en esta vista. Ábrelo desde claude.ai.",
-   f_tips:"Consejos", f_stay:"Alojamiento", f_note:'Generado con Rumbo · verifica horarios y precios antes de reservar. Consejo: usa "Imprimir → Guardar como PDF".',
-   sh_trip:"Viaje a", sh_tips:"CONSEJOS", sh_made:"Hecho con Rumbo",
+   f_tips:"Consejos", f_stay:"Alojamiento", f_note:'Generado con Nómada · verifica horarios y precios antes de reservar. Consejo: usa "Imprimir → Guardar como PDF".',
+   sh_trip:"Viaje a", sh_tips:"CONSEJOS", sh_made:"Hecho con Nómada",
    who:[["couple","En pareja","en pareja"],["family","En familia","en familia con niños"],["friends","Con amigos","con amigos"],["solo","Solo/a","en solitario"]],
-   styles:[["cult","🏛️ Cultura","cultura e historia",true],["gastro","🍷 Gastronomía","buena gastronomía local",true],["nat","🌿 Naturaleza","naturaleza y aire libre",false],["relax","☕ Relax","ritmo tranquilo y relax",false],["night","🎶 Ambiente","vida nocturna y ambiente",false],["cheap","💸 Barato","viaje económico y de bajo presupuesto",false]],
-   pace:[["slow","🐢 Tranquilo","pocas cosas al día, sin prisas",false],["norm","🚶 Normal","equilibrado",true],["fast","⚡ Intenso","aprovechar al máximo, muchas visitas",false]]
+   styles:[["cult","Cultura","cultura e historia",true],["gastro","Gastronomía","buena gastronomía local",true],["nat","Naturaleza","naturaleza y aire libre",false],["relax","Relax","ritmo tranquilo y relax",false],["night","Ambiente","vida nocturna y ambiente",false],["cheap","Económico","viaje económico y de bajo presupuesto",false]],
+   pace:[["slow","Tranquilo","pocas cosas al día, sin prisas",false],["norm","Normal","equilibrado",true],["fast","Intenso","aprovechar al máximo, muchas visitas",false]]
  },
  en:{kicker:"AI itineraries",
-   tagline:"Tell us where you're going, when and with whom. Claude builds a day-by-day plan: what to see, where to eat and how to get around.",
+   tagline:"Tell us where you're going, when and with whom. The AI builds a day-by-day plan: what to see, where to eat and how to get around.",
    l_dest:"Where are you going?", ph_dest:"Rome, Tokyo, Costa Rica, Andalusia…",
    l_from:"Departure date", l_to:"Return date", l_people:"How many of you?", l_who:"With whom?",
    l_styles:"What do you feel like?", l_pace:"Pace",
-   l_musts:"Must-dos (for sure)", ph_musts:"Sagrada Família, dinner at El Xampanyet…",
+   l_musts:"Must-dos", ph_musts:"Sagrada Família, dinner at El Xampanyet…",
    h_musts:"Places or restaurants you definitely want: the plan will fit them into the best day.",
    sub_transport:"Transport & accommodation · optional",
-   l_arr:"On day 1 you arrive at…", l_dep:"On the last day you leave at…",
+   l_arr:"Arrival on day 1", l_dep:"Departure on last day",
    l_stay:"Where are you staying?", ph_stay:"Neighborhood or address (e.g. near the main square) — or leave it empty",
-   h_stay:"If you fill this in, Rumbo groups each day by proximity so you waste less time getting around.",
-   btn_go:"✦ Create my itinerary",
-   foot1:"Rumbo · prototype · plans are generated by Claude — check times, prices and availability before booking.",
+   h_stay:"If you fill this in, Nómada groups each day by proximity so you waste less time getting around.",
+   btn_go:"Create itinerary",
+   foot1:"Nómada · prototype · plans are generated by AI — check times, prices and availability before booking.",
    foot2:"The booking buttons are placeholders for the future affiliate links (Booking / Civitatis / GetYourGuide).",
    st_think:"Planning your trip…", st_write:"Writing your itinerary…", stop:"Stop",
    msgs:["Finding the best spots…","Ordering the day-by-day plan…","Fitting in your must-dos…","Picking where to eat…","Tuning the pace of the trip…"],
-   ai_unav_t:"AI isn't available here", ai_unav_d:"Open this page from claude.ai and accept when it asks to use Claude. In a preview without a session it can't generate.",
+   ai_unav_t:"AI isn't available here", ai_unav_d:"Open this page from claude.ai and accept when it asks to use the AI. In a preview without a session it can't generate.",
    e_dest:"Enter a destination.", e_dates:"Pick both dates.", e_return:"The return must be after the departure.", e_max:"Try trips of up to 14 days.",
-   e_notgr:"You need to allow the page to use Claude. Reload it and accept the prompt.",
+   e_notgr:"You need to allow the page to use the AI. Reload it and accept the prompt.",
    e_rate:"Too many requests in a row. Wait a moment and try again.",
    e_json:"The response didn't come out right. Try again or change something.",
-   e_ref:"Try rephrasing the destination or interests.", e_sess:"Your Claude session expired, sign in again.",
+   e_ref:"Try rephrasing the destination or interests.", e_sess:"Your session expired, sign in again.",
    e_gen:"Something failed while generating. Try again in a moment.",
    day:"day", days:"days", trav:"traveler", travs:"travelers",
    stay_opt:"Optimized around your accommodation",
-   tips_for:"Tips for", regen:"↻ Another version", share:"↗ Share", dl:"⬇ Download itinerary", dl_wait:"Preparing…",
-   aff_eye:"🏨 No place to stay yet?", aff_h:"Apartments in",
+   tips_for:"Tips for", regen:"Another version", share:"Share", dl:"Download", dl_wait:"Preparing…",
+   aff_eye:"No place to stay yet?", aff_h:"Apartments in",
    aff_active:" Every booking from here earns you a commission, at no cost to the traveler.",
    aff_inactive:" (Affiliate links ready: add your ID in the config to activate them.)",
-   aff_book:"🏨 Search on Booking", aff_air:"🛏️ Search on Airbnb", aff_link:"affiliate link",
-   aff_car:"🚗 Rent a car", aff_car_s:"car search",
+   aff_book:"Search on Booking", aff_air:"Search on Airbnb", aff_link:"affiliate link",
+   aff_car:"Rent a car", aff_car_s:"car search",
    comm_title:"Community trips", comm_sub:"Plans shared by other travelers. Filter by price, copy one and tweak it to your taste.",
-   comm_loading:"Loading trips…", comm_empty:"No trips published yet. Be the first to share yours!",
-   publish:"🌍 Publish to community", published:"Published to the community! ✓", pub_wait:"Publishing…",
+   comm_loading:"Loading trips…", comm_empty:"No trips published yet. Be the first to share yours.",
+   publish:"Publish", published:"Published to the community", pub_wait:"Publishing…",
    pub_fail:"Couldn't publish (you may not have write access here).",
-   copy_edit:"Copy & edit", copied_trip:"Copied ✓ tweak it and regenerate or publish",
+   copy_edit:"Copy & edit", copied_trip:"Copied — tweak it and regenerate or publish",
    per_person:"per person", free:"Free", price_total:"Estimated cost",
    filt_dest:"Search destination…", filt_price:"Max price €/person", filt_sort:"Sort",
    sort_new:"Newest", sort_cheap:"Cheapest", sort_exp:"Most expensive",
    comm_none_f:"No trips match the filter. Raise the price or change the destination.",
-   ed_edit:"✏️ Edit by hand", ed_done:"✓ Done",
-   ed_hint:"Edit text and prices, reorder with ▲▼, mark must-dos with ★, and add or remove activities and days. When finished, press Done.",
-   ed_addact:"➕ Activity", ed_addday:"➕ Add day",
+   ed_edit:"Edit by hand", ed_done:"Done",
+   ed_hint:"Edit text and prices, reorder with the arrows, mark must-dos, and add or remove activities and days. When finished, press Done.",
+   ed_addact:"Add activity", ed_addday:"Add day",
    ph_daytitle:"Day title", ph_name:"Place or restaurant name", ph_det:"Detail (1 sentence)", ph_moment:"Time",
    ty_ver:"See", ty_comer:"Eat", ty_mover:"Transport",
-   map_link:"🗺 View on Maps", ta_link:"⭐ TripAdvisor",
-   copied:"Itinerary copied ✓ paste it wherever you want", nocopy:"Couldn't copy automatically",
+   map_link:"Google Maps", ta_link:"TripAdvisor",
+   copied:"Itinerary copied — paste it wherever you want", nocopy:"Couldn't copy automatically",
    dl_unav:"Download isn't available in this view. Open it from claude.ai.",
-   f_tips:"Tips", f_stay:"Accommodation", f_note:'Made with Rumbo · check times and prices before booking. Tip: use "Print → Save as PDF".',
-   sh_trip:"Trip to", sh_tips:"TIPS", sh_made:"Made with Rumbo",
+   f_tips:"Tips", f_stay:"Accommodation", f_note:'Made with Nómada · check times and prices before booking. Tip: use "Print → Save as PDF".',
+   sh_trip:"Trip to", sh_tips:"TIPS", sh_made:"Made with Nómada",
    who:[["couple","As a couple","as a couple"],["family","With family","with kids (family)"],["friends","With friends","with friends"],["solo","Solo","solo"]],
-   styles:[["cult","🏛️ Culture","culture and history",true],["gastro","🍷 Food","great local food",true],["nat","🌿 Nature","nature and outdoors",false],["relax","☕ Relax","slow, relaxed pace",false],["night","🎶 Nightlife","nightlife and atmosphere",false],["cheap","💸 Budget","budget, low-cost trip",false]],
-   pace:[["slow","🐢 Relaxed","few things a day, no rush",false],["norm","🚶 Normal","balanced",true],["fast","⚡ Intense","make the most of it, lots of visits",false]]
+   styles:[["cult","Culture","culture and history",true],["gastro","Food","great local food",true],["nat","Nature","nature and outdoors",false],["relax","Relax","slow, relaxed pace",false],["night","Nightlife","nightlife and atmosphere",false],["cheap","Budget","budget, low-cost trip",false]],
+   pace:[["slow","Relaxed","few things a day, no rush",false],["norm","Normal","balanced",true],["fast","Intense","make the most of it, lots of visits",false]]
  }
 };
 const t=k=>T[lang][k];
@@ -520,7 +527,7 @@ function renderComm(){
   rows.forEach(v=>{
     const L=T[v.lang&&T[v.lang]?v.lang:lang];
     const price=Number(v.priceTotal||0);
-    const badge=price>0?`💶 ≈${Math.round(price)}€ ${L.per_person}`:L.free;
+    const badge=price>0?`≈${Math.round(price)} € ${L.per_person}`:L.free;
     const card=document.createElement("div");card.className="tripcard";
     card.innerHTML=`<div class="tc-top"><h3>${esc(v.dest||"")}</h3><span class="tc-price">${badge}</span></div>
       <div class="tc-meta">${v.days} ${pl(v.days,L.day,L.days)} · ${v.people} ${pl(v.people,L.trav,L.travs)} · ${(v.lang||"es").toUpperCase()}</div>
@@ -697,6 +704,31 @@ function tripTotal(data){
       const n=Number(a.precio);if(!isNaN(n))s+=n;}));
   return Math.round(s);
 }
+const IC={
+  see:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6-5.2-6-10a6 6 0 0 1 12 0c0 4.8-6 10-6 10Z"/><circle cx="12" cy="11" r="2.1"/></svg>',
+  eat:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v6a2 2 0 0 0 4 0V3M7 3v18M17 3c-1.6 0-2.8 1.9-2.8 4.2S15.4 11.4 17 11.4V21"/></svg>',
+  move:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="12" rx="2"/><path d="M5 11h14M8.5 20l1-4M15.5 20l-1-4"/></svg>',
+  star:'<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3.6l2.5 5.1 5.6.8-4 4 .9 5.6L12 16.5 7 19.1l1-5.6-4-4 5.6-.8L12 3.6Z"/></svg>'
+};
+function actSvg(a){return a.tipo==="comer"?IC.eat:a.tipo==="mover"?IC.move:a.must?IC.star:IC.see;}
+
+/* ─── autocompletado ─── */
+const DESTS=["Barcelona, España","Madrid, España","Girona, España","Sevilla, España","Valencia, España","Granada, España","Málaga, España","Bilbao, España","San Sebastián, España","Toledo, España","Córdoba, España","Santiago de Compostela, España","Palma de Mallorca, España","Ibiza, España","Tenerife, España","Las Palmas, España","Oviedo, España","Cádiz, España","Salamanca, España","Zaragoza, España","Lisboa, Portugal","Oporto, Portugal","Madeira, Portugal","Roma, Italia","Florencia, Italia","Venecia, Italia","Milán, Italia","Nápoles, Italia","Sicilia, Italia","París, Francia","Niza, Francia","Lyon, Francia","Burdeos, Francia","Marsella, Francia","Londres, Reino Unido","Edimburgo, Reino Unido","Ámsterdam, Países Bajos","Bruselas, Bélgica","Berlín, Alemania","Múnich, Alemania","Viena, Austria","Praga, Chequia","Budapest, Hungría","Cracovia, Polonia","Atenas, Grecia","Santorini, Grecia","Estambul, Turquía","Copenhague, Dinamarca","Estocolmo, Suecia","Reikiavik, Islandia","Dublín, Irlanda","Zúrich, Suiza","Marrakech, Marruecos","El Cairo, Egipto","Ciudad del Cabo, Sudáfrica","Nueva York, EE. UU.","Los Ángeles, EE. UU.","San Francisco, EE. UU.","Miami, EE. UU.","Chicago, EE. UU.","Ciudad de México, México","Cancún, México","La Habana, Cuba","Buenos Aires, Argentina","Río de Janeiro, Brasil","Cuzco, Perú","Cartagena, Colombia","Santiago, Chile","Tokio, Japón","Kioto, Japón","Osaka, Japón","Bangkok, Tailandia","Bali, Indonesia","Singapur","Hong Kong","Seúl, Corea del Sur","Pekín, China","Dubái, EAU","Nueva Delhi, India","Hanói, Vietnam","Sídney, Australia","Auckland, Nueva Zelanda"];
+function buildDestList(){const dl=$("#destlist");if(!dl)return;dl.innerHTML=DESTS.map(d=>`<option value="${d}">`).join("");}
+const placeCache={};
+function fillPlaces(arr){const dl=$("#placelist");if(!dl)return;
+  dl.innerHTML=arr.map(s=>`<option value="${String(s).replace(/"/g,"&quot;")}">`).join("");}
+async function fetchPlaces(dest){
+  dest=(dest||"").trim();if(!dest)return;
+  if(placeCache[dest]){fillPlaces(placeCache[dest]);return;}
+  const sample=await samplePromise;if(!sample)return;
+  try{
+    const arr=await sample.json(`List up to 25 famous, real tourist sights, landmarks and well-known restaurants in ${dest}. Reply ONLY with a JSON array of strings (names only), no other text.`,
+      {modelTier:"quick",cache:{gcTime:86400000}});
+    if(Array.isArray(arr)){placeCache[dest]=arr.map(String);fillPlaces(placeCache[dest]);}
+  }catch(e){}
+}
+
 function render(data,ctx,L0){
   curData=data;curCtx=ctx;curL=L0;
   if(editing)return renderEditor(data,ctx,L0);
@@ -704,14 +736,13 @@ function render(data,ctx,L0){
   const dias=Array.isArray(data.dias)?data.dias:[];
   const loc=L0==="en"?"en-US":"es-ES";
   const fmt=d=>d.toLocaleDateString(loc,{weekday:"short",day:"numeric",month:"short"});
-  const icon=a=>a.tipo==="comer"?"🍽️":a.tipo==="mover"?"🚌":a.must?"⭐":"📍";
   const total=tripTotal(data);
-  const totalTxt=total>0?`💶 ≈${total}€ ${L.per_person}`:L.free;
+  const totalTxt=total>0?`≈${total} € ${L.per_person}`:L.free;
   let h=`<div class="trip-head"><h2>${esc(ctx.dest)}</h2>
     <span class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}</span>
     <span class="price-tag">${totalTxt}</span></div>`;
   if(data.resumen)h+=`<p class="resumen">${esc(data.resumen)}</p>`;
-  if(ctx.stay)h+=`<p class="resumen" style="color:var(--accent);font-size:13px">📍 ${L.stay_opt}: ${esc(ctx.stay)}</p>`;
+  if(ctx.stay)h+=`<p class="resumen" style="color:var(--accent);font-size:13px">${L.stay_opt}: ${esc(ctx.stay)}</p>`;
   h+=`<div class="rail">`;
   dias.forEach((d,i)=>{
     const date=new Date(ctx.from);date.setDate(date.getDate()+i);
@@ -731,8 +762,8 @@ function render(data,ctx,L0){
           <a href="${gmap}" target="_blank" rel="noopener">${L.map_link}</a>
           <a href="${ta}" target="_blank" rel="noopener">${L.ta_link}</a></div>`;
       }
-      h+=`<div class="act ${cls}"><div class="icn">${icon(a)}</div>
-        <div class="c"><h4>${esc(a.nombre)}${a.must?' <span class="star">★</span>':""}${prTag}<span class="when">${esc(a.momento||"")}</span></h4>
+      h+=`<div class="act ${cls}"><div class="icn">${actSvg(a)}</div>
+        <div class="c"><h4>${esc(a.nombre)}${a.must?` <span class="star">${IC.star}</span>`:""}${prTag}<span class="when">${esc(a.momento||"")}</span></h4>
         <p>${esc(a.detalle||"")}</p>${links}</div></div>`;});
     h+=`</div>`;});
   h+=`</div>`;
@@ -763,7 +794,7 @@ function render(data,ctx,L0){
       <a class="btn" href="${cars}" target="_blank" rel="noopener sponsored">${L.aff_car}<small>${carS}</small></a>
     </div></div>`;
   $("#out").innerHTML=h;
-  $("#edit").onclick=()=>{editing=true;render(curData,curCtx,curL);};
+  $("#edit").onclick=()=>{editing=true;fetchPlaces(curCtx.dest);render(curData,curCtx,curL);};
   $("#regen").onclick=()=>generate(true);
   $("#share").onclick=()=>share(data,ctx,L0);
   $("#dl").onclick=()=>download(data,ctx,L0);
@@ -777,7 +808,7 @@ function renderEditor(data,ctx,L0){
   const loc=L0==="en"?"en-US":"es-ES";
   const fmt=d=>d.toLocaleDateString(loc,{weekday:"short",day:"numeric",month:"short"});
   const total=tripTotal(data);
-  const totalTxt=total>0?`💶 ≈${total}€ ${L.per_person}`:L.free;
+  const totalTxt=total>0?`≈${total} € ${L.per_person}`:L.free;
   const nd=(data.dias||[]).length;
   let h=`<div class="trip-head"><h2>${esc(ctx.dest)}</h2>
      <span class="meta">${nd} ${pl(nd,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)}</span>
@@ -793,7 +824,7 @@ function renderEditor(data,ctx,L0){
         <span class="ed-daybtns">
           <button class="ed-b" data-act="dayup" data-di="${i}">▲</button>
           <button class="ed-b" data-act="daydown" data-di="${i}">▼</button>
-          <button class="ed-b del" data-act="daydel" data-di="${i}">🗑</button>
+          <button class="ed-b del" data-act="daydel" data-di="${i}" title="${L.ed_done}">✕</button>
         </span>
       </div>
       <input class="ed-in ed-title" data-di="${i}" data-f="titulo" value="${ea(d.titulo||"")}" placeholder="${L.ph_daytitle}">`;
@@ -806,9 +837,9 @@ function renderEditor(data,ctx,L0){
           <button class="ed-b${a.must?" on":""}" data-act="must" data-di="${i}" data-ai="${j}">★</button>
           <button class="ed-b" data-act="up" data-di="${i}" data-ai="${j}">▲</button>
           <button class="ed-b" data-act="down" data-di="${i}" data-ai="${j}">▼</button>
-          <button class="ed-b del" data-act="del" data-di="${i}" data-ai="${j}">🗑</button>
+          <button class="ed-b del" data-act="del" data-di="${i}" data-ai="${j}">✕</button>
         </div>
-        <input class="ed-in ed-name" data-di="${i}" data-ai="${j}" data-f="nombre" value="${ea(a.nombre||"")}" placeholder="${L.ph_name}">
+        <input class="ed-in ed-name" list="placelist" data-di="${i}" data-ai="${j}" data-f="nombre" value="${ea(a.nombre||"")}" placeholder="${L.ph_name}">
         <input class="ed-in ed-det" data-di="${i}" data-ai="${j}" data-f="detalle" value="${ea(a.detalle||"")}" placeholder="${L.ph_det}">
       </div>`;});
     h+=`<button class="ed-add" data-act="addact" data-di="${i}">${L.ed_addact}</button></div>`;
@@ -866,20 +897,19 @@ function shareText(data,ctx,L0){
   const fmt=d=>d.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long"});
   const dias=Array.isArray(data.dias)?data.dias:[];
   const total=tripTotal(data);
-  let s=`✈️ ${(L.sh_trip+" "+ctx.dest).toUpperCase()}\n${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${ctx.who}\n`;
-  s+=total>0?`💶 ${L.price_total}: ≈${total}€ ${L.per_person}\n`:"";
+  let s=`${(L.sh_trip+" "+ctx.dest).toUpperCase()}\n${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${ctx.who}\n`;
+  s+=total>0?`${L.price_total}: ≈${total} € ${L.per_person}\n`:"";
   if(data.resumen)s+=`\n${data.resumen}\n`;
-  if(ctx.stay)s+=`📍 ${L.f_stay}: ${ctx.stay}\n`;
+  if(ctx.stay)s+=`${L.f_stay}: ${ctx.stay}\n`;
   dias.forEach((d,i)=>{
     const date=new Date(ctx.from);date.setDate(date.getDate()+i);
-    s+=`\n━━ ${L0==="en"?"DAY":"DÍA"} ${i+1} · ${d.titulo||""} (${fmt(date)}) ━━\n`;
+    s+=`\n── ${L0==="en"?"DAY":"DÍA"} ${i+1} · ${d.titulo||""} (${fmt(date)}) ──\n`;
     (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
-      const ic=a.tipo==="comer"?"🍽️":a.tipo==="mover"?"🚌":a.must?"⭐":"📍";
-      const pr=Number(a.precio);const pt=(!isNaN(pr)&&pr>0)?` (~${Math.round(pr)}€)`:"";
-      s+=`${ic} ${a.momento?a.momento+": ":""}${a.nombre}${pt}\n   ${a.detalle||""}\n`;});
+      const pr=Number(a.precio);const pt=(!isNaN(pr)&&pr>0)?` (~${Math.round(pr)} €)`:"";
+      s+=`• ${a.momento?a.momento+": ":""}${a.nombre}${a.must?" *":""}${pt}\n  ${a.detalle||""}\n`;});
   });
   if(Array.isArray(data.consejos)&&data.consejos.length)
-    s+=`\n💡 ${L.sh_tips}\n`+data.consejos.map(c=>`· ${c}`).join("\n")+"\n";
+    s+=`\n${L.sh_tips}\n`+data.consejos.map(c=>`· ${c}`).join("\n")+"\n";
   s+=`\n${L.sh_made}`;
   return s;
 }
@@ -904,9 +934,9 @@ async function download(data,ctx,L0){
   const fmt=d=>d.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long"});
   const dias=Array.isArray(data.dias)?data.dias:[];
   const total=tripTotal(data);
-  let body=`<h1>${esc(ctx.dest)}</h1><p class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}${total>0?` · 💶 ≈${total}€ ${L.per_person}`:""}</p>`;
+  let body=`<h1>${esc(ctx.dest)}</h1><p class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}${total>0?` · ≈${total} € ${L.per_person}`:""}</p>`;
   if(data.resumen)body+=`<p class="res">${esc(data.resumen)}</p>`;
-  if(ctx.stay)body+=`<p class="res">📍 ${L.f_stay}: ${esc(ctx.stay)}</p>`;
+  if(ctx.stay)body+=`<p class="res">${L.f_stay}: ${esc(ctx.stay)}</p>`;
   dias.forEach((d,i)=>{
     const date=new Date(ctx.from);date.setDate(date.getDate()+i);
     body+=`<div class="day"><h2>${L0==="en"?"Day":"Día"} ${i+1} · ${esc(d.titulo||"")} <span>${fmt(date)}</span></h2>`;
@@ -934,7 +964,7 @@ async function download(data,ctx,L0){
 <p style="margin-top:26px;color:#9aa3b5;font-size:12px">${L.f_note}</p></body></html>`;
   const safe=ctx.dest.replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-|-$/g,"").slice(0,40)||"trip";
   try{btn.disabled=true;btn.textContent=L.dl_wait;
-    await dls.save({filename:`Rumbo-${safe}.html`,data:doc});
+    await dls.save({filename:`Nomada-${safe}.html`,data:doc});
   }catch(e){if(e.code!=="declined")alert("Error: "+(e.message||e.code||""));}
   finally{btn.disabled=false;btn.textContent=L.dl;}
 }
@@ -942,4 +972,6 @@ async function download(data,ctx,L0){
 $("#go").onclick=()=>generate(false);
 ["f-dest","f-price"].forEach(id=>{const el=document.getElementById(id);if(el)el.oninput=renderComm;});
 {const fs=document.getElementById("f-sort");if(fs)fs.onchange=renderComm;}
+buildDestList();
+$("#dest").addEventListener("change",()=>fetchPlaces($("#dest").value));
 </script>

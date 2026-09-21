@@ -1,4 +1,4 @@
-# Rumbo · Planificador de viajes con IA
+# Nómada · Planificador de viajes con IA
 
 Prototipo de una web que genera itinerarios de viaje día a día con IA.
 El usuario indica destino, fechas, personas, con quién viaja, intereses,
@@ -13,6 +13,8 @@ devuelve un plan con qué ver, dónde comer y cómo organizar los días.
 - **Imprescindibles**: sitios/restaurantes que se incluyen sí o sí.
 - Idioma ES / EN (interfaz e itinerario).
 - Descargar y compartir el itinerario.
+- **Autocompletado**: destino con lista de sugerencias al escribir; sitios y restaurantes
+  sugeridos por IA según el destino (imprescindibles y editor).
 - **Precios estimados**: la IA estima un precio aproximado (€/persona) por actividad y
   calcula el total del viaje; se muestra en el itinerario, al compartir y al descargar.
 - **Comunidad (estilo Wikiloc/Strava)**: publicar tu viaje, que otros lo copien y editen,

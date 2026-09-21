@@ -1,0 +1,730 @@
+<title>Rumbo · Viajes con IA</title>
+<style>
+  :root{
+    --bg:#EEF1F6; --card:#FFFFFF; --ink:#0F1523; --ink-soft:#525C74;
+    --line:#E2E7F0; --muted:#8B94A8; --accent:#3457FF; --accent-soft:#E6EAFF;
+    --warm:#E1832A; --warm-soft:#FBEBD8; --ok:#1FA97E;
+    --shadow:0 1px 2px rgba(15,21,35,.05),0 10px 30px rgba(15,21,35,.06);
+    --r:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B0E16; --card:#141926; --ink:#ECEFF6; --ink-soft:#A3ACC2;
+      --line:#232B3D; --muted:#6C768F; --accent:#6E86FF; --accent-soft:#1A2340;
+      --warm:#EEA254; --warm-soft:#2C2214; --ok:#3FBF97;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0E16; --card:#141926; --ink:#ECEFF6; --ink-soft:#A3ACC2;
+    --line:#232B3D; --muted:#6C768F; --accent:#6E86FF; --accent-soft:#1A2340;
+    --warm:#EEA254; --warm-soft:#2C2214; --ok:#3FBF97;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0}
+  h1,h2,h3,h4{font-family:"Bricolage Grotesque",Georgia,serif;font-weight:600;
+    text-wrap:balance;margin:0;letter-spacing:-.01em}
+  .mono{font-family:"DM Mono","SF Mono",ui-monospace,monospace}
+  .eyebrow{font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.14em;
+    font-size:10.5px;color:var(--muted)}
+
+  header{padding-block:26px 4px}
+  .toprow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .kicker{display:inline-flex;align-items:center;gap:7px;font-family:"DM Mono",monospace;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+    background:var(--accent-soft);padding:5px 11px;border-radius:999px}
+  .kicker .live{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .langsw{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+  .langsw button{font:inherit;font-size:12px;font-weight:600;border:none;background:transparent;
+    color:var(--ink-soft);padding:6px 12px;cursor:pointer}
+  .langsw button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  h1.logo{font-size:38px;margin-top:14px}
+  h1.logo b{color:var(--accent)}
+  .tagline{color:var(--ink-soft);margin-top:8px;font-size:15.5px;max-width:52ch}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:var(--shadow);padding:22px;margin-top:22px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1/-1}
+  .field.sub{margin-top:4px;padding-top:14px;border-top:1px solid var(--line)}
+  .hint{font-size:11.5px;color:var(--muted);line-height:1.4}
+  label{font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.01em}
+  input,select{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);
+    border:1px solid var(--line);border-radius:11px;padding:11px 13px;width:100%}
+  input::placeholder{color:var(--muted)}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font-size:13px;padding:8px 13px;border:1px solid var(--line);border-radius:999px;
+    background:var(--bg);color:var(--ink-soft);cursor:pointer;user-select:none;transition:.12s}
+  .chip[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .go{grid-column:1/-1;margin-top:6px;font:inherit;font-weight:700;font-size:16px;
+    background:var(--accent);color:#fff;border:none;border-radius:12px;padding:15px;
+    cursor:pointer;box-shadow:var(--shadow);display:flex;justify-content:center;gap:9px;align-items:center}
+  .go:hover{filter:brightness(1.05)} .go:disabled{opacity:.6;cursor:default}
+  .err{grid-column:1/-1;color:var(--warm);font-size:13px;font-weight:600}
+
+  #out{margin-top:26px}
+  .status{display:flex;align-items:center;gap:12px;background:var(--card);
+    border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:20px}
+  .spin{width:20px;height:20px;border:2.5px solid var(--accent-soft);border-top-color:var(--accent);
+    border-radius:50%;animation:sp .8s linear infinite;flex:none}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.spin{animation:none}}
+  .status .txt{flex:1}.status .txt b{display:block;font-size:14.5px}
+  .status .txt span{font-size:12.5px;color:var(--muted)}
+  .stop{font:inherit;font-size:12.5px;font-weight:600;color:var(--ink-soft);background:var(--bg);
+    border:1px solid var(--line);border-radius:9px;padding:8px 12px;cursor:pointer}
+
+  .trip-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:4px}
+  .trip-head h2{font-size:27px}
+  .trip-head .meta{font-family:"DM Mono",monospace;font-size:12px;color:var(--muted)}
+  .resumen{color:var(--ink-soft);font-size:15px;margin:6px 0 4px;max-width:60ch}
+
+  .rail{position:relative;margin-top:18px;padding-left:6px}
+  .day{position:relative;padding:4px 0 20px 26px;border-left:2px solid var(--line);margin-left:8px}
+  .day:last-child{border-left-color:transparent}
+  .day-dot{position:absolute;left:-9px;top:2px;width:16px;height:16px;border-radius:50%;
+    background:var(--accent);border:3px solid var(--card);box-shadow:0 0 0 1px var(--line)}
+  .day-h{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
+  .day-h .n{font-family:"DM Mono",monospace;font-size:11px;color:var(--accent);font-weight:500}
+  .day-h h3{font-size:17px}
+  .day-h .date{margin-left:auto;font-size:11px;color:var(--muted);font-family:"DM Mono",monospace}
+  .act{display:flex;gap:12px;padding:11px 0 3px}
+  .act .icn{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    font-size:14px;background:var(--accent-soft)}
+  .act.comer .icn{background:var(--warm-soft)}
+  .act.must .icn{background:var(--warm-soft);box-shadow:0 0 0 2px var(--warm)}
+  .act .c h4{font-size:14.5px;font-family:inherit;font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+  .act .c h4 .when{font-family:"DM Mono",monospace;font-size:10px;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--muted);font-weight:500}
+  .act .c h4 .star{color:var(--warm);font-size:11px;font-weight:700}
+  .act .c p{margin:2px 0 0;font-size:13.5px;color:var(--ink-soft)}
+
+  .tips{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:var(--shadow);padding:16px 18px;margin-top:8px}
+  .tips .eyebrow{color:var(--accent);margin-bottom:8px}
+  .tips ul{margin:0;padding-left:18px}.tips li{font-size:13.5px;margin:5px 0}
+
+  .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+  .ghost{font:inherit;font-size:13px;font-weight:600;padding:10px 15px;border-radius:11px;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+  .ghost:hover{border-color:var(--accent)}
+
+  .aff{margin-top:16px;background:linear-gradient(180deg,var(--card),var(--bg));
+    border:1px solid var(--line);border-radius:var(--r);padding:18px}
+  .aff .eyebrow{color:var(--warm)}
+  .aff h3{font-size:17px;margin:5px 0 5px}
+  .aff p{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;max-width:60ch}
+  .aff .row{display:flex;flex-wrap:wrap;gap:9px}
+  .aff .btn{font-size:13px;font-weight:600;padding:10px 14px;border-radius:11px;text-align:left;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;
+    display:inline-block;text-decoration:none}
+  .aff .btn:hover{border-color:var(--accent)}
+  .aff .btn small{display:block;font-weight:400;color:var(--muted);font-size:10.5px;margin-top:1px}
+
+  #community{margin-top:34px}
+  .comm-head{border-top:1px solid var(--line);padding-top:22px;margin-bottom:14px}
+  .comm-head h2{font-size:22px}
+  .comm-sub{color:var(--ink-soft);font-size:13.5px;margin:4px 0 0;max-width:56ch}
+  #comm-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tripcard{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:15px;display:flex;flex-direction:column;gap:6px}
+  .tripcard h3{font-size:16px}
+  .tripcard .tc-meta{font-family:"DM Mono",monospace;font-size:11px;color:var(--muted)}
+  .tripcard .tc-res{font-size:13px;color:var(--ink-soft);flex:1;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .tripcard .tc-copy{font:inherit;font-size:12.5px;font-weight:600;margin-top:2px;
+    background:var(--accent-soft);color:var(--accent);border:none;border-radius:9px;padding:8px 12px;cursor:pointer}
+  .tripcard .tc-copy:hover{filter:brightness(.97)}
+  .comm-msg{color:var(--muted);font-size:13px;grid-column:1/-1;padding:8px 0}
+  @media(max-width:540px){#comm-list{grid-template-columns:1fr}}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);
+    background:var(--ink);color:var(--bg);font-size:13.5px;font-weight:600;
+    padding:12px 18px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+    transition:.25s;z-index:50;max-width:90vw;text-align:center}
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+  footer{color:var(--muted);font-size:11.5px;text-align:center;padding:26px 0 40px;line-height:1.7}
+  @media(max-width:540px){.grid{grid-template-columns:1fr}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+
+<div class="wrap">
+  <header>
+    <div class="toprow">
+      <span class="kicker"><span class="live"></span> <span data-i18n="kicker">Itinerarios con IA</span></span>
+      <span class="langsw">
+        <button id="lang-es" aria-pressed="true">ES</button>
+        <button id="lang-en" aria-pressed="false">EN</button>
+      </span>
+    </div>
+    <h1 class="logo">Rumbo<b>.</b></h1>
+    <p class="tagline" data-i18n="tagline">Dinos a dónde vas, cuándo y con quién. Claude te monta un plan día a día: qué ver, dónde comer y cómo moverte.</p>
+  </header>
+
+  <div class="panel">
+    <div class="grid">
+      <div class="field full">
+        <label for="dest" data-i18n="l_dest">¿A dónde vas?</label>
+        <input id="dest" data-i18n-ph="ph_dest" placeholder="Roma, Tokio, Costa Rica, Andalucía…" value="Lisboa, Portugal" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="from" data-i18n="l_from">Fecha de ida</label>
+        <input type="date" id="from">
+      </div>
+      <div class="field">
+        <label for="to" data-i18n="l_to">Fecha de vuelta</label>
+        <input type="date" id="to">
+      </div>
+      <div class="field">
+        <label for="people" data-i18n="l_people">¿Cuántos sois?</label>
+        <input type="number" id="people" min="1" max="16" value="2">
+      </div>
+      <div class="field">
+        <label for="who" data-i18n="l_who">¿Con quién?</label>
+        <select id="who"></select>
+      </div>
+      <div class="field full">
+        <label data-i18n="l_styles">¿Qué te apetece?</label>
+        <div class="chips" id="styles"></div>
+      </div>
+      <div class="field full">
+        <label data-i18n="l_pace">Ritmo</label>
+        <div class="chips" id="pace"></div>
+      </div>
+
+      <div class="field full">
+        <label for="musts" data-i18n="l_musts">Imprescindibles (sí o sí)</label>
+        <input id="musts" data-i18n-ph="ph_musts" placeholder="Sagrada Família, cenar en El Xampanyet…" autocomplete="off">
+        <span class="hint" data-i18n="h_musts">Sitios o restaurantes que quieres seguro: el plan los incluirá el día que mejor encaje.</span>
+      </div>
+
+      <div class="field full sub"><span class="eyebrow" data-i18n="sub_transport">Transporte y alojamiento · opcional</span></div>
+      <div class="field">
+        <label for="arr" data-i18n="l_arr">Llegas el primer día a las…</label>
+        <input type="time" id="arr">
+      </div>
+      <div class="field">
+        <label for="dep" data-i18n="l_dep">Te vas el último día a las…</label>
+        <input type="time" id="dep">
+      </div>
+      <div class="field full">
+        <label for="stay" data-i18n="l_stay">¿Dónde te alojas?</label>
+        <input id="stay" data-i18n-ph="ph_stay" placeholder="Barrio o dirección (ej. cerca de la Plaza Mayor) — o déjalo vacío" autocomplete="off">
+        <span class="hint" data-i18n="h_stay">Si lo rellenas, Rumbo agrupa cada día por cercanía para que pierdas menos tiempo en desplazamientos.</span>
+      </div>
+
+      <div class="err" id="err" hidden></div>
+      <button class="go" id="go" data-i18n="btn_go">✦ Crear mi itinerario</button>
+    </div>
+  </div>
+
+  <div id="out"></div>
+
+  <section id="community" hidden>
+    <div class="comm-head">
+      <h2 data-i18n="comm_title">Viajes de la comunidad</h2>
+      <p class="comm-sub" data-i18n="comm_sub">Planes publicados por otros viajeros. Copia uno y ajústalo a tu gusto.</p>
+    </div>
+    <div id="comm-list"></div>
+  </section>
+
+  <footer>
+    <span data-i18n="foot1">Rumbo · prototipo · los planes los genera Claude — verifica horarios, precios y disponibilidad antes de reservar.</span><br>
+    <span data-i18n="foot2">Los botones de reserva son marcadores del futuro enlace de afiliación (Booking / Civitatis / GetYourGuide).</span>
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ENLACES DE AFILIADO — pega aquí tus IDs cuando te des de alta.
+   Mientras estén vacíos, los enlaces funcionan como búsqueda normal.
+   BOOKING: https://www.booking.com/affiliate-program/  → te dan un aid.
+   AIRBNB:  sin programa directo; vía Travelpayouts (travelpayouts.com).
+   ═══════════════════════════════════════════════════════════════ */
+const AFF={
+  bookingAid:"", bookingLabel:"rumbo", travelpayoutsMarker:"",
+  // COCHE: pega el enlace de afiliado completo que te genere tu programa de alquiler
+  // (DiscoverCars / Rentalcars vía Travelpayouts, etc.). Si lo dejas vacío, va a la búsqueda normal.
+  carsUrl:""
+};
+function bookingUrl(dest,ci,co,ad){
+  let u=`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(dest)}&checkin=${ci}&checkout=${co}&group_adults=${ad}`;
+  if(AFF.bookingAid)u+=`&aid=${encodeURIComponent(AFF.bookingAid)}&label=${encodeURIComponent(AFF.bookingLabel||"rumbo")}`;
+  return u;
+}
+function airbnbUrl(dest,ci,co,ad){
+  const search=`https://www.airbnb.es/s/${encodeURIComponent(dest)}/homes?checkin=${ci}&checkout=${co}&adults=${ad}`;
+  if(AFF.travelpayoutsMarker)
+    return `https://tp.media/r?marker=${encodeURIComponent(AFF.travelpayoutsMarker)}&p=airbnb&u=${encodeURIComponent(search)}`;
+  return search;
+}
+function carsUrl(dest){
+  if(AFF.carsUrl)return AFF.carsUrl;
+  return `https://www.discovercars.com/search?keyword=${encodeURIComponent(dest)}`;
+}
+
+const $=s=>document.querySelector(s);
+
+/* ─── i18n ─── */
+let lang="es";
+let dbReady=false;
+const T={
+ es:{kicker:"Itinerarios con IA",
+   tagline:"Dinos a dónde vas, cuándo y con quién. Claude te monta un plan día a día: qué ver, dónde comer y cómo moverte.",
+   l_dest:"¿A dónde vas?", ph_dest:"Roma, Tokio, Costa Rica, Andalucía…",
+   l_from:"Fecha de ida", l_to:"Fecha de vuelta", l_people:"¿Cuántos sois?", l_who:"¿Con quién?",
+   l_styles:"¿Qué te apetece?", l_pace:"Ritmo",
+   l_musts:"Imprescindibles (sí o sí)", ph_musts:"Sagrada Família, cenar en El Xampanyet…",
+   h_musts:"Sitios o restaurantes que quieres seguro: el plan los incluirá el día que mejor encaje.",
+   sub_transport:"Transporte y alojamiento · opcional",
+   l_arr:"Llegas el primer día a las…", l_dep:"Te vas el último día a las…",
+   l_stay:"¿Dónde te alojas?", ph_stay:"Barrio o dirección (ej. cerca de la Plaza Mayor) — o déjalo vacío",
+   h_stay:"Si lo rellenas, Rumbo agrupa cada día por cercanía para que pierdas menos tiempo en desplazamientos.",
+   btn_go:"✦ Crear mi itinerario",
+   foot1:"Rumbo · prototipo · los planes los genera Claude — verifica horarios, precios y disponibilidad antes de reservar.",
+   foot2:"Los botones de reserva son marcadores del futuro enlace de afiliación (Booking / Civitatis / GetYourGuide).",
+   st_think:"Pensando el viaje…", st_write:"Escribiendo tu itinerario…", stop:"Parar",
+   msgs:["Buscando los mejores sitios…","Ordenando el itinerario día a día…","Encajando tus imprescindibles…","Eligiendo dónde comer…","Ajustando el ritmo del viaje…"],
+   ai_unav_t:"La IA no está disponible aquí", ai_unav_d:"Abre esta página desde claude.ai y acepta cuando te pida usar Claude. En una vista previa sin sesión no puede generar.",
+   e_dest:"Escribe un destino.", e_dates:"Elige las dos fechas.", e_return:"La vuelta debe ser posterior a la ida.", e_max:"Prueba viajes de hasta 14 días.",
+   e_notgr:"Necesitas permitir que la página use Claude. Recárgala y acepta el aviso.",
+   e_rate:"Demasiadas peticiones seguidas. Espera un momento y vuelve a intentarlo.",
+   e_json:"La respuesta no salió bien. Prueba otra vez o cambia algún dato.",
+   e_ref:"Prueba a reformular el destino o los intereses.", e_sess:"Tu sesión de Claude ha caducado, vuelve a entrar.",
+   e_gen:"Algo falló al generar. Inténtalo de nuevo en un momento.",
+   day:"día", days:"días", trav:"viajero", travs:"viajeros",
+   stay_opt:"Optimizado alrededor de tu alojamiento",
+   tips_for:"Consejos para", regen:"↻ Otra versión", share:"↗ Compartir", dl:"⬇ Descargar itinerario", dl_wait:"Preparando…",
+   aff_eye:"🏨 ¿Aún no tienes alojamiento?", aff_h:"Apartamentos en",
+   aff_active:" Cada reserva desde aquí te genera comisión, sin coste para el viajero.",
+   aff_inactive:" (Enlaces de afiliado listos: añade tu ID en la config para activarlos.)",
+   aff_book:"🏨 Buscar en Booking", aff_air:"🛏️ Buscar en Airbnb", aff_link:"enlace afiliado",
+   aff_car:"🚗 Alquiler de coche", aff_car_s:"búsqueda de coches",
+   comm_title:"Viajes de la comunidad", comm_sub:"Planes publicados por otros viajeros. Copia uno y ajústalo a tu gusto.",
+   comm_loading:"Cargando viajes…", comm_empty:"Aún no hay viajes publicados. ¡Sé el primero en compartir el tuyo!",
+   publish:"🌍 Publicar en la comunidad", published:"¡Publicado en la comunidad! ✓", pub_wait:"Publicando…",
+   pub_fail:"No se pudo publicar (quizá no tienes permiso de escritura aquí).",
+   copy_edit:"Copiar y editar", copied_trip:"Copiado ✓ ajústalo y vuelve a generar o publicar",
+   copied:"Itinerario copiado ✓ pégalo donde quieras", nocopy:"No se pudo copiar automáticamente",
+   dl_unav:"La descarga no está disponible en esta vista. Ábrelo desde claude.ai.",
+   f_tips:"Consejos", f_stay:"Alojamiento", f_note:'Generado con Rumbo · verifica horarios y precios antes de reservar. Consejo: usa "Imprimir → Guardar como PDF".',
+   sh_trip:"Viaje a", sh_tips:"CONSEJOS", sh_made:"Hecho con Rumbo",
+   who:[["couple","En pareja","en pareja"],["family","En familia","en familia con niños"],["friends","Con amigos","con amigos"],["solo","Solo/a","en solitario"]],
+   styles:[["cult","🏛️ Cultura","cultura e historia",true],["gastro","🍷 Gastronomía","buena gastronomía local",true],["nat","🌿 Naturaleza","naturaleza y aire libre",false],["relax","☕ Relax","ritmo tranquilo y relax",false],["night","🎶 Ambiente","vida nocturna y ambiente",false],["cheap","💸 Barato","viaje económico y de bajo presupuesto",false]],
+   pace:[["slow","🐢 Tranquilo","pocas cosas al día, sin prisas",false],["norm","🚶 Normal","equilibrado",true],["fast","⚡ Intenso","aprovechar al máximo, muchas visitas",false]]
+ },
+ en:{kicker:"AI itineraries",
+   tagline:"Tell us where you're going, when and with whom. Claude builds a day-by-day plan: what to see, where to eat and how to get around.",
+   l_dest:"Where are you going?", ph_dest:"Rome, Tokyo, Costa Rica, Andalusia…",
+   l_from:"Departure date", l_to:"Return date", l_people:"How many of you?", l_who:"With whom?",
+   l_styles:"What do you feel like?", l_pace:"Pace",
+   l_musts:"Must-dos (for sure)", ph_musts:"Sagrada Família, dinner at El Xampanyet…",
+   h_musts:"Places or restaurants you definitely want: the plan will fit them into the best day.",
+   sub_transport:"Transport & accommodation · optional",
+   l_arr:"On day 1 you arrive at…", l_dep:"On the last day you leave at…",
+   l_stay:"Where are you staying?", ph_stay:"Neighborhood or address (e.g. near the main square) — or leave it empty",
+   h_stay:"If you fill this in, Rumbo groups each day by proximity so you waste less time getting around.",
+   btn_go:"✦ Create my itinerary",
+   foot1:"Rumbo · prototype · plans are generated by Claude — check times, prices and availability before booking.",
+   foot2:"The booking buttons are placeholders for the future affiliate links (Booking / Civitatis / GetYourGuide).",
+   st_think:"Planning your trip…", st_write:"Writing your itinerary…", stop:"Stop",
+   msgs:["Finding the best spots…","Ordering the day-by-day plan…","Fitting in your must-dos…","Picking where to eat…","Tuning the pace of the trip…"],
+   ai_unav_t:"AI isn't available here", ai_unav_d:"Open this page from claude.ai and accept when it asks to use Claude. In a preview without a session it can't generate.",
+   e_dest:"Enter a destination.", e_dates:"Pick both dates.", e_return:"The return must be after the departure.", e_max:"Try trips of up to 14 days.",
+   e_notgr:"You need to allow the page to use Claude. Reload it and accept the prompt.",
+   e_rate:"Too many requests in a row. Wait a moment and try again.",
+   e_json:"The response didn't come out right. Try again or change something.",
+   e_ref:"Try rephrasing the destination or interests.", e_sess:"Your Claude session expired, sign in again.",
+   e_gen:"Something failed while generating. Try again in a moment.",
+   day:"day", days:"days", trav:"traveler", travs:"travelers",
+   stay_opt:"Optimized around your accommodation",
+   tips_for:"Tips for", regen:"↻ Another version", share:"↗ Share", dl:"⬇ Download itinerary", dl_wait:"Preparing…",
+   aff_eye:"🏨 No place to stay yet?", aff_h:"Apartments in",
+   aff_active:" Every booking from here earns you a commission, at no cost to the traveler.",
+   aff_inactive:" (Affiliate links ready: add your ID in the config to activate them.)",
+   aff_book:"🏨 Search on Booking", aff_air:"🛏️ Search on Airbnb", aff_link:"affiliate link",
+   aff_car:"🚗 Rent a car", aff_car_s:"car search",
+   comm_title:"Community trips", comm_sub:"Plans shared by other travelers. Copy one and tweak it to your taste.",
+   comm_loading:"Loading trips…", comm_empty:"No trips published yet. Be the first to share yours!",
+   publish:"🌍 Publish to community", published:"Published to the community! ✓", pub_wait:"Publishing…",
+   pub_fail:"Couldn't publish (you may not have write access here).",
+   copy_edit:"Copy & edit", copied_trip:"Copied ✓ tweak it and regenerate or publish",
+   copied:"Itinerary copied ✓ paste it wherever you want", nocopy:"Couldn't copy automatically",
+   dl_unav:"Download isn't available in this view. Open it from claude.ai.",
+   f_tips:"Tips", f_stay:"Accommodation", f_note:'Made with Rumbo · check times and prices before booking. Tip: use "Print → Save as PDF".',
+   sh_trip:"Trip to", sh_tips:"TIPS", sh_made:"Made with Rumbo",
+   who:[["couple","As a couple","as a couple"],["family","With family","with kids (family)"],["friends","With friends","with friends"],["solo","Solo","solo"]],
+   styles:[["cult","🏛️ Culture","culture and history",true],["gastro","🍷 Food","great local food",true],["nat","🌿 Nature","nature and outdoors",false],["relax","☕ Relax","slow, relaxed pace",false],["night","🎶 Nightlife","nightlife and atmosphere",false],["cheap","💸 Budget","budget, low-cost trip",false]],
+   pace:[["slow","🐢 Relaxed","few things a day, no rush",false],["norm","🚶 Normal","balanced",true],["fast","⚡ Intense","make the most of it, lots of visits",false]]
+ }
+};
+const t=k=>T[lang][k];
+
+// estado de selección persistente entre idiomas (por id)
+let selStyles=new Set(T.es.styles.filter(s=>s[3]).map(s=>s[0]));
+let selPace="norm", selWho="couple";
+
+function buildChips(){
+  const sc=$("#styles");sc.innerHTML="";
+  T[lang].styles.forEach(([id,label])=>{
+    const c=document.createElement("span");c.className="chip";c.dataset.id=id;c.textContent=label;
+    c.setAttribute("aria-pressed",selStyles.has(id)?"true":"false");
+    c.onclick=()=>{selStyles.has(id)?selStyles.delete(id):selStyles.add(id);
+      c.setAttribute("aria-pressed",selStyles.has(id)?"true":"false");};
+    sc.appendChild(c);});
+  const pc=$("#pace");pc.innerHTML="";
+  T[lang].pace.forEach(([id,label])=>{
+    const c=document.createElement("span");c.className="chip";c.dataset.id=id;c.textContent=label;
+    c.setAttribute("aria-pressed",selPace===id?"true":"false");
+    c.onclick=()=>{selPace=id;pc.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+      c.setAttribute("aria-pressed","true");};
+    pc.appendChild(c);});
+  const w=$("#who");w.innerHTML="";
+  T[lang].who.forEach(([id,label])=>{
+    const o=document.createElement("option");o.value=id;o.textContent=label;w.appendChild(o);});
+  w.value=selWho; w.onchange=()=>selWho=w.value;
+}
+function phrase(list,id){const f=list.find(x=>x[0]===id);return f?f[2]:id;}
+
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{const v=t(el.dataset.i18n);if(v!=null)el.textContent=v;});
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{const v=t(el.dataset.i18nPh);if(v!=null)el.placeholder=v;});
+  buildChips();
+  $("#lang-es").setAttribute("aria-pressed",lang==="es");
+  $("#lang-en").setAttribute("aria-pressed",lang==="en");
+  if(dbReady)loadCommunity();
+}
+$("#lang-es").onclick=()=>{lang="es";applyLang();};
+$("#lang-en").onclick=()=>{lang="en";applyLang();};
+
+// fechas por defecto
+const dnow=new Date();const d1=new Date(dnow);d1.setDate(d1.getDate()+21);
+const d2=new Date(d1);d2.setDate(d2.getDate()+3);
+const iso=d=>d.toISOString().slice(0,10);
+$("#from").value=iso(d1);$("#to").value=iso(d2);
+applyLang();
+
+let samplePromise=claude.use("sample").catch(()=>null);
+let downloadsPromise=claude.use("downloads").catch(()=>null);
+let dbPromise=claude.use("db").catch(()=>null);
+let ctl=null;
+dbPromise.then(db=>{dbReady=!!db;loadCommunity();});
+
+async function loadCommunity(){
+  const db=await dbPromise;
+  const sec=$("#community");
+  if(!db){sec.hidden=true;return;}
+  sec.hidden=false;
+  const list=$("#comm-list");
+  list.innerHTML=`<div class="comm-msg">${t("comm_loading")}</div>`;
+  try{
+    const snap=await db.collection("trips").orderBy("createdAt","desc").limit(30).get();
+    if(snap.empty){list.innerHTML=`<div class="comm-msg">${t("comm_empty")}</div>`;return;}
+    list.innerHTML="";
+    snap.docs.forEach(d=>{
+      const v=d.data();if(!v)return;
+      const L=T[v.lang&&T[v.lang]?v.lang:lang];
+      const card=document.createElement("div");card.className="tripcard";
+      card.innerHTML=`<h3>${esc(v.dest||"")}</h3>
+        <div class="tc-meta">${v.days} ${pl(v.days,L.day,L.days)} · ${v.people} ${pl(v.people,L.trav,L.travs)} · ${(v.lang||"es").toUpperCase()}</div>
+        <div class="tc-res">${esc(v.resumen||"")}</div>`;
+      const btn=document.createElement("button");btn.className="tc-copy";btn.textContent=t("copy_edit");
+      btn.onclick=()=>copyTrip(v);
+      card.appendChild(btn);list.appendChild(card);
+    });
+  }catch(e){list.innerHTML=`<div class="comm-msg">${t("comm_empty")}</div>`;}
+}
+
+async function publishTrip(data,ctx){
+  const db=await dbPromise;const btn=$("#pub");
+  if(!db){return;}
+  try{
+    if(btn){btn.disabled=true;btn.textContent=t("pub_wait");}
+    await db.collection("trips").add({
+      dest:ctx.dest,ci:ctx.ci,co:ctx.co,people:ctx.people,who:ctx.who,whoId:ctx.whoId,
+      stay:ctx.stay||"",musts:ctx.musts||"",styleIds:ctx.styleIds||[],paceId:ctx.paceId||"norm",
+      lang:ctx.lang||"es",days:ctx.days,resumen:data.resumen||"",data:data,createdAt:Date.now()
+    });
+    toast(t("published"));
+    loadCommunity();
+  }catch(e){toast(t("pub_fail"));}
+  finally{if(btn){btn.disabled=false;btn.textContent=t("publish");}}
+}
+
+function copyTrip(v){
+  if(v.lang&&T[v.lang]&&v.lang!==lang){lang=v.lang;}
+  if(Array.isArray(v.styleIds))selStyles=new Set(v.styleIds);
+  if(v.paceId)selPace=v.paceId;
+  if(v.whoId)selWho=v.whoId;
+  applyLang();
+  $("#dest").value=v.dest||"";
+  if(v.ci)$("#from").value=v.ci;
+  if(v.co)$("#to").value=v.co;
+  $("#people").value=v.people||2;
+  $("#stay").value=v.stay||"";
+  $("#musts").value=v.musts||"";
+  const from=new Date(v.ci);
+  render(v.data,{dest:v.dest,days:v.days,people:v.people,who:v.who,from,ci:v.ci,co:v.co,
+    stay:v.stay,musts:v.musts,styleIds:v.styleIds||[],paceId:v.paceId,whoId:v.whoId,lang:v.lang},v.lang||lang);
+  toast(t("copied_trip"));
+}
+
+function statusBox(){
+  return `<div class="status"><div class="spin"></div>
+    <div class="txt"><b id="st-b">${t("st_think")}</b><span id="st-s">${t("msgs")[0]}</span></div>
+    <button class="stop" id="st-stop">${t("stop")}</button></div>`;}
+function fail(m){const e=$("#err");e.textContent=m;e.hidden=false;}
+function clearErr(){$("#err").hidden=true;}
+function pl(n,s,p){return n===1?s:p;}
+
+async function generate(fresh){
+  clearErr();
+  const L=T[lang];
+  const dest=$("#dest").value.trim();
+  const from=new Date($("#from").value),to=new Date($("#to").value);
+  if(!dest)return fail(L.e_dest);
+  if(!$("#from").value||!$("#to").value||isNaN(from)||isNaN(to))return fail(L.e_dates);
+  const days=Math.round((to-from)/864e5)+1;
+  if(days<1)return fail(L.e_return);
+  if(days>14)return fail(L.e_max);
+  const people=Math.max(1,parseInt($("#people").value)||1);
+  const who=phrase(L.who,selWho);
+  const styles=[...selStyles].map(id=>phrase(L.styles,id));
+  const pace=phrase(L.pace,selPace);
+  const musts=$("#musts").value.trim();
+  const arr=$("#arr").value,dep=$("#dep").value,stay=$("#stay").value.trim();
+  const ci=$("#from").value,co=$("#to").value;
+
+  const sample=await samplePromise;
+  if(!sample){
+    $("#out").innerHTML=`<div class="status"><div class="txt"><b>${L.ai_unav_t}</b><span>${L.ai_unav_d}</span></div></div>`;
+    return;}
+
+  $("#go").disabled=true;
+  $("#out").innerHTML=statusBox();
+  let mi=0;const rot=setInterval(()=>{const s=$("#st-s");if(s)s.textContent=L.msgs[++mi%L.msgs.length];},2200);
+  ctl=new AbortController();
+  $("#st-stop").onclick=()=>ctl.abort();
+
+  const prompt=buildPrompt(lang,{dest,from,to,days,people,who,styles,pace,musts,arr,dep,stay});
+  try{
+    const data=await sample.json(prompt,{modelTier:"default",signal:ctl.signal,cache:fresh?false:true,
+      onText:()=>{const b=$("#st-b");if(b)b.textContent=L.st_write;}});
+    clearInterval(rot);
+    render(data,{dest,days,people,who,from,ci,co,stay,musts,
+      styleIds:[...selStyles],paceId:selPace,whoId:selWho,lang},lang);
+  }catch(e){
+    clearInterval(rot);
+    const map={not_granted:L.e_notgr,rate_limited:L.e_rate,invalid_json:L.e_json,cancelled:"",
+      refused:L.e_ref,session_expired:L.e_sess};
+    const msg=map[e.code]??L.e_gen;
+    $("#out").innerHTML="";
+    if(msg)fail(msg);
+  }finally{$("#go").disabled=false;}
+}
+
+function buildPrompt(lang,p){
+  const {dest,from,to,days,people,who,styles,pace,musts,arr,dep,stay}=p;
+  if(lang==="en"){
+    const fmt=d=>d.toLocaleDateString("en-US",{weekday:"long",day:"numeric",month:"long"});
+    const lines=[
+      musts?`- MUST-DO: the traveler definitely wants these — include EVERY one, on the day it best fits: ${musts}.`:"",
+      arr?`- Day 1 starts AFTER ${arr} (leave time to arrive and check in); only what fits that afternoon/evening.`:"",
+      dep?`- The LAST day ends BEFORE ${dep} and leaves room to reach the station/airport; don't overfill it.`:"",
+      stay?`- Group each day into NEARBY areas close to the accommodation at "${stay}", to minimize travel. In "detalle" note when something is near the accommodation or the previous stop.`:""
+    ].filter(Boolean).join("\n");
+    return `You are an expert travel guide. Create an itinerary for a real trip.
+
+Destination: ${dest}
+Dates: ${fmt(from)} to ${fmt(to)} (${days} day(s))
+Travelers: ${people} person(s), ${who}
+Interests: ${styles.join(", ")||"varied"}
+Pace: ${pace}
+
+Rules:
+- Exactly ${days} object(s) in "dias", one per day.
+- Use REAL, well-known places, neighborhoods and restaurants in ${dest}. Do not invent names.
+- Each day: 2-4 activities with a time slot (Morning, Lunch, Afternoon, Evening), including where to eat.
+- Adapt to the pace, the interests, and that they travel ${who}.
+${lines}
+- Everything in ENGLISH, warm and concrete. "detalle" one sentence.
+
+Reply with ONLY this JSON (no surrounding text):
+{"resumen":"one sentence hook for the trip",
+ "dias":[{"titulo":"short day theme","actividades":[
+   {"momento":"Morning","tipo":"ver","nombre":"Real place","detalle":"Short sentence.","must":false},
+   {"momento":"Lunch","tipo":"comer","nombre":"Real restaurant","detalle":"What to order.","must":false}]}],
+ "consejos":["practical tip 1","practical tip 2","practical tip 3"]}
+tipo is "ver", "comer" or "mover". Set "must":true on any activity that fulfills a must-do the traveler requested.`;
+  }
+  const fmt=d=>d.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
+  const lines=[
+    musts?`- IMPRESCINDIBLES: el viajero quiere estos SÍ o SÍ — inclúyelos TODOS, cada uno en el día que mejor encaje: ${musts}.`:"",
+    arr?`- El DÍA 1 empieza DESPUÉS de las ${arr} (deja tiempo para llegar y hacer el check-in); solo lo que dé tiempo esa tarde/noche.`:"",
+    dep?`- El ÚLTIMO DÍA termina ANTES de las ${dep} y deja margen para ir a la estación/aeropuerto; no lo llenes.`:"",
+    stay?`- Agrupa las actividades de cada día por ZONAS cercanas entre sí y al alojamiento en "${stay}", para minimizar desplazamientos. En "detalle" menciona cuando algo esté cerca del alojamiento o de la parada anterior.`:""
+  ].filter(Boolean).join("\n");
+  return `Eres un guía de viajes experto. Crea un itinerario para un viaje real.
+
+Destino: ${dest}
+Fechas: del ${fmt(from)} al ${fmt(to)} (${days} día(s))
+Viajeros: ${people} persona(s), ${who}
+Intereses: ${styles.join(", ")||"variado"}
+Ritmo: ${pace}
+
+Reglas:
+- Exactamente ${days} objeto(s) en "dias", uno por cada día.
+- Usa lugares, barrios y restaurantes REALES y conocidos de ${dest}. No inventes nombres.
+- Cada día: 2-4 actividades con un momento (Mañana, Comida, Tarde, Noche), incluyendo dónde comer.
+- Ajusta al ritmo, a los intereses y a que viajan ${who}.
+${lines}
+- Todo en ESPAÑOL, cercano y concreto. "detalle" de 1 frase.
+
+Responde SOLO con este JSON (sin texto alrededor):
+{"resumen":"una frase con el gancho del viaje",
+ "dias":[{"titulo":"tema corto del día","actividades":[
+   {"momento":"Mañana","tipo":"ver","nombre":"Lugar real","detalle":"Frase breve.","must":false},
+   {"momento":"Comida","tipo":"comer","nombre":"Restaurante real","detalle":"Qué pedir.","must":false}]}],
+ "consejos":["consejo práctico 1","consejo práctico 2","consejo práctico 3"]}
+tipo es "ver", "comer" o "mover". Pon "must":true en cualquier actividad que cumpla un imprescindible que pidió el viajero.`;
+}
+
+function esc(s){return String(s??"").replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));}
+function render(data,ctx,L0){
+  const L=T[L0];
+  const dias=Array.isArray(data.dias)?data.dias:[];
+  const loc=L0==="en"?"en-US":"es-ES";
+  const fmt=d=>d.toLocaleDateString(loc,{weekday:"short",day:"numeric",month:"short"});
+  const icon=a=>a.tipo==="comer"?"🍽️":a.tipo==="mover"?"🚌":a.must?"⭐":"📍";
+  let h=`<div class="trip-head"><h2>${esc(ctx.dest)}</h2>
+    <span class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}</span></div>`;
+  if(data.resumen)h+=`<p class="resumen">${esc(data.resumen)}</p>`;
+  if(ctx.stay)h+=`<p class="resumen" style="color:var(--accent);font-size:13px">📍 ${L.stay_opt}: ${esc(ctx.stay)}</p>`;
+  h+=`<div class="rail">`;
+  dias.forEach((d,i)=>{
+    const date=new Date(ctx.from);date.setDate(date.getDate()+i);
+    h+=`<div class="day"><span class="day-dot"></span>
+      <div class="day-h"><span class="n">${L0==="en"?"DAY":"DÍA"} ${i+1}</span><h3>${esc(d.titulo||"")}</h3>
+      <span class="date">${fmt(date)}</span></div>`;
+    (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
+      const cls=(a.tipo==="comer"?"comer ":"")+(a.must?"must":"");
+      h+=`<div class="act ${cls}"><div class="icn">${icon(a)}</div>
+        <div class="c"><h4>${esc(a.nombre)}${a.must?' <span class="star">★</span>':""}<span class="when">${esc(a.momento||"")}</span></h4>
+        <p>${esc(a.detalle||"")}</p></div></div>`;});
+    h+=`</div>`;});
+  h+=`</div>`;
+  if(Array.isArray(data.consejos)&&data.consejos.length)
+    h+=`<div class="tips"><div class="eyebrow">${L.tips_for} ${esc(ctx.dest)}</div><ul>${
+      data.consejos.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`;
+  const canPub=dbReady;
+  h+=`<div class="actions">
+      <button class="ghost" id="regen">${L.regen}</button>
+      <button class="ghost" id="share">${L.share}</button>
+      <button class="ghost" id="dl">${L.dl}</button>
+      ${canPub?`<button class="ghost" id="pub">${L.publish}</button>`:""}</div>`;
+  const booking=bookingUrl(ctx.dest,ctx.ci,ctx.co,ctx.people);
+  const airbnb=airbnbUrl(ctx.dest,ctx.ci,ctx.co,ctx.people);
+  const active=AFF.bookingAid||AFF.travelpayoutsMarker;
+  const cars=carsUrl(ctx.dest);
+  const bkS=AFF.bookingAid?L.aff_link:`${ctx.ci} → ${ctx.co}`;
+  const abS=AFF.travelpayoutsMarker?L.aff_link:`${ctx.people} ${pl(ctx.people,L.trav,L.travs)}`;
+  const carS=AFF.carsUrl?L.aff_link:L.aff_car_s;
+  const anyAff=active||AFF.carsUrl;
+  h+=`<div class="aff"><div class="eyebrow">${L.aff_eye}</div>
+    <h3>${L.aff_h} ${esc(ctx.dest)}</h3>
+    <p>${anyAff?L.aff_active:L.aff_inactive}</p>
+    <div class="row">
+      <a class="btn" href="${booking}" target="_blank" rel="noopener sponsored">${L.aff_book}<small>${bkS}</small></a>
+      <a class="btn" href="${airbnb}" target="_blank" rel="noopener sponsored">${L.aff_air}<small>${abS}</small></a>
+      <a class="btn" href="${cars}" target="_blank" rel="noopener sponsored">${L.aff_car}<small>${carS}</small></a>
+    </div></div>`;
+  $("#out").innerHTML=h;
+  $("#regen").onclick=()=>generate(true);
+  $("#share").onclick=()=>share(data,ctx,L0);
+  $("#dl").onclick=()=>download(data,ctx,L0);
+  if($("#pub"))$("#pub").onclick=()=>publishTrip(data,ctx);
+  $("#out").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function toast(msg){
+  let el=document.getElementById("toast");
+  if(!el){el=document.createElement("div");el.id="toast";document.body.appendChild(el);}
+  el.textContent=msg;el.classList.add("show");
+  clearTimeout(el._h);el._h=setTimeout(()=>el.classList.remove("show"),2600);
+}
+function shareText(data,ctx,L0){
+  const L=T[L0];const loc=L0==="en"?"en-US":"es-ES";
+  const fmt=d=>d.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long"});
+  const dias=Array.isArray(data.dias)?data.dias:[];
+  let s=`✈️ ${(L.sh_trip+" "+ctx.dest).toUpperCase()}\n${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${ctx.who}\n`;
+  if(data.resumen)s+=`\n${data.resumen}\n`;
+  if(ctx.stay)s+=`📍 ${L.f_stay}: ${ctx.stay}\n`;
+  dias.forEach((d,i)=>{
+    const date=new Date(ctx.from);date.setDate(date.getDate()+i);
+    s+=`\n━━ ${L0==="en"?"DAY":"DÍA"} ${i+1} · ${d.titulo||""} (${fmt(date)}) ━━\n`;
+    (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
+      const ic=a.tipo==="comer"?"🍽️":a.tipo==="mover"?"🚌":a.must?"⭐":"📍";
+      s+=`${ic} ${a.momento?a.momento+": ":""}${a.nombre}\n   ${a.detalle||""}\n`;});
+  });
+  if(Array.isArray(data.consejos)&&data.consejos.length)
+    s+=`\n💡 ${L.sh_tips}\n`+data.consejos.map(c=>`· ${c}`).join("\n")+"\n";
+  s+=`\n${L.sh_made}`;
+  return s;
+}
+async function copyText(text){
+  try{await navigator.clipboard.writeText(text);return true;}catch(e){}
+  try{const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+    document.body.appendChild(ta);ta.select();const ok=document.execCommand("copy");ta.remove();return ok;}catch(e){return false;}
+}
+async function share(data,ctx,L0){
+  const L=T[L0];const text=shareText(data,ctx,L0);
+  if(navigator.share){
+    try{await navigator.share({title:`${L.sh_trip} ${ctx.dest}`,text});return;}
+    catch(e){if(e&&e.name==="AbortError")return;}
+  }
+  toast(await copyText(text)?L.copied:L.nocopy);
+}
+async function download(data,ctx,L0){
+  const L=T[L0];const btn=$("#dl");if(!btn)return;
+  const dls=await downloadsPromise;
+  if(!dls){alert(L.dl_unav);return;}
+  const loc=L0==="en"?"en-US":"es-ES";
+  const fmt=d=>d.toLocaleDateString(loc,{weekday:"long",day:"numeric",month:"long"});
+  const dias=Array.isArray(data.dias)?data.dias:[];
+  let body=`<h1>${esc(ctx.dest)}</h1><p class="meta">${ctx.days} ${pl(ctx.days,L.day,L.days)} · ${ctx.people} ${pl(ctx.people,L.trav,L.travs)} · ${esc(ctx.who)}</p>`;
+  if(data.resumen)body+=`<p class="res">${esc(data.resumen)}</p>`;
+  if(ctx.stay)body+=`<p class="res">📍 ${L.f_stay}: ${esc(ctx.stay)}</p>`;
+  dias.forEach((d,i)=>{
+    const date=new Date(ctx.from);date.setDate(date.getDate()+i);
+    body+=`<div class="day"><h2>${L0==="en"?"Day":"Día"} ${i+1} · ${esc(d.titulo||"")} <span>${fmt(date)}</span></h2>`;
+    (Array.isArray(d.actividades)?d.actividades:[]).forEach(a=>{
+      body+=`<div class="act"><b>${esc(a.momento||"")}</b> — <b>${esc(a.nombre)}</b>${a.must?" ★":""}<br><span>${esc(a.detalle||"")}</span></div>`;});
+    body+=`</div>`;});
+  if(Array.isArray(data.consejos)&&data.consejos.length)
+    body+=`<div class="tips"><h2>${L.f_tips}</h2><ul>${data.consejos.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`;
+  const doc=`<!doctype html><html lang="${L0}"><head><meta charset="utf-8"><title>${esc(ctx.dest)}</title><style>
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1a2233;max-width:720px;margin:32px auto;padding:0 20px;line-height:1.5}
+  h1{font-size:30px;margin:0 0 4px} .meta{color:#7a8398;font-family:monospace;margin:0 0 14px}
+  .res{color:#444;margin:6px 0}
+  .day{border-top:2px solid #e5e9f0;padding:14px 0;page-break-inside:avoid}
+  h2{font-size:17px;margin:0 0 8px} h2 span{float:right;font-weight:400;color:#8b94a8;font-size:12px;font-family:monospace}
+  .act{margin:8px 0} .act span{color:#555}
+  .tips{background:#f2f5fb;border-radius:10px;padding:12px 18px;margin-top:16px} .tips li{margin:4px 0}
+  @media print{body{margin:0}}
+</style></head><body>${body}
+<p style="margin-top:26px;color:#9aa3b5;font-size:12px">${L.f_note}</p></body></html>`;
+  const safe=ctx.dest.replace(/[^\p{L}\p{N}]+/gu,"-").replace(/^-|-$/g,"").slice(0,40)||"trip";
+  try{btn.disabled=true;btn.textContent=L.dl_wait;
+    await dls.save({filename:`Rumbo-${safe}.html`,data:doc});
+  }catch(e){if(e.code!=="declined")alert("Error: "+(e.message||e.code||""));}
+  finally{btn.disabled=false;btn.textContent=L.dl;}
+}
+
+$("#go").onclick=()=>generate(false);
+</script>
